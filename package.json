@@ -8,12 +8,13 @@
   "scripts": {
     "build": "nest build",
     "dev": "nest start -b swc --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "dev:d": "nest start -b swc --debug --watch",
+    "dev:p": "node dist/main",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@fastify/one-line-logger": "^2.0.0",
     "@fastify/static": "^7.0.4",
     "@nestjs/common": "^10.4.2",
     "@nestjs/config": "^3.2.3",
