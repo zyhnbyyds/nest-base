@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,3 +12,28 @@ model User {
   email String
   name  String?
 }
+
+model WeixinUser {
+  userId          BigInt   @id @default(autoincrement()) @map("user_id") // 用户唯一ID，自增主键
+  openId          String   @unique @map("open_id") // 微信OpenID
+  unionId         String?  @map("union_id") // 微信的UnionID，可选
+  nickname        String?  @map("nickname") // 微信昵称
+  avatarUrl       String?  @map("avatar_url") // 头像URL
+  gender          Int      @default(0) @map("gender") // 性别，0: 未知，1: 男，2: 女
+  language        String   @default("zh_CN") @map("language") // 语言
+  city            String?  @map("city") // 城市
+  province        String?  @map("province") // 省份
+  country         String?  @map("country") // 国家
+  phone     String?  @map("phone_number") // 绑定手机号码
+  subscribeStatus Boolean  @default(false) @map("subscribe_status") // 是否关注公众号
+  subscribeTime   DateTime? @map("subscribe_time") // 关注时间
+  unsubscribeTime DateTime? @map("unsubscribe_time") // 取消关注时间
+  lastLoginTime   DateTime? @map("last_login_time") // 最后登录时间
+  createdAt       DateTime @default(now()) @map("created_at") // 创建时间
+  updatedAt       DateTime @updatedAt @map("updated_at") // 最后更新时间
+
+  @@map("weixin_user") // 表名映射
+  @@index([unionId], name: "union_id_index") // UnionID 索引
+  @@index([subscribeStatus], name: "subscribe_status_index") // 关注状态索引
+}
+
