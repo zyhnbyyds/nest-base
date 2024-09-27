@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String
-  name  String?
-}
-
 model WeixinUser {
   userId          BigInt   @id @default(autoincrement()) @map("user_id") // 用户唯一ID，自增主键
   openId          String   @unique @map("open_id") // 微信OpenID
