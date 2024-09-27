@@ -12,7 +12,9 @@
     "dev:p": "node dist/main",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "db:init": "prisma migrate dev --name init"
+    "db:init": "prisma migrate dev --name init",
+    "compodoc": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 -s --language zh-CN",
+    "compodoc:init": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 --language zh-CN"
   },
   "dependencies": {
     "@fastify/one-line-logger": "^2.0.0",
@@ -33,6 +35,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.7.1",
+    "@compodoc/compodoc": "^1.1.25",
     "@nestjs/cli": "^10.4.5",
     "@nestjs/schematics": "^10.1.4",
     "@types/node": "^22.6.1",
