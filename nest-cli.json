@@ -64,6 +64,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/logger/tsconfig.app.json"
       }
+    },
+    "email": {
+      "type": "application",
+      "root": "apps/email",
+      "entryFile": "main",
+      "sourceRoot": "apps/email/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/email/tsconfig.app.json"
+      }
     }
   }
 }

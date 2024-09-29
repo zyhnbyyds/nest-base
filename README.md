@@ -9,8 +9,11 @@
  - port 3000
  - port 3002(ws-event)
 
-### Logger(Tcp)
+### Logger(Microservice-Tcp)
  - port 3004
 
 ### Core(Grpc)
  - port 3001
+
+### Email(Microservice-Tcp)
+ - port 3006
