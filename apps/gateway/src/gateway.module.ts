@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common'
-import { GatewayController } from './gateway.controller'
-import { GatewayService } from './gateway.service'
-import { WsModule } from './ws.module'
+import { WsModule } from './ws/ws.module'
 
 @Module({
   imports: [WsModule],
-  controllers: [GatewayController],
-  providers: [GatewayService],
+  controllers: [],
+  providers: [],
 })
 export class GatewayModule {}

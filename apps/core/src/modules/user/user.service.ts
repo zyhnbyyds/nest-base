@@ -5,6 +5,7 @@ import { PrismaService } from 'common/common/services/prisma.service'
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+
   async create(createUserDto: User) {
     return await this.prisma.user.create({ data: createUserDto, select: { userId: true, openId: true } })
   }
