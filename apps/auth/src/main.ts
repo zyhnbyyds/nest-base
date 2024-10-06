@@ -1,6 +1,7 @@
-import { INestApplication, Inject } from '@nestjs/common'
+import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
+import { SubAppPortEnum } from 'common/common/enums/subapps'
 import { FastifyInstance } from 'fastify'
 import { AuthModule } from './auth.module'
 
@@ -12,6 +13,6 @@ async function bootstrap() {
       },
     },
   }))
-  await app.listen(3005)
+  await app.listen(SubAppPortEnum.Auth)
 }
 bootstrap()

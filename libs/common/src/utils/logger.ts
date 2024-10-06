@@ -5,6 +5,12 @@ export interface LogExtraMsg {
   logLevel: string
 }
 
+/**
+ * 将请求对象转换为日志记录对象
+ * @param request
+ * @param options
+ * @returns
+ */
 export function transReqToLogRecord(request: FastifyRequest, options: Partial<LogExtraMsg> = {}) {
   const { method, url, headers, ip, body, params, query } = request
   const payload = { params, query, body }

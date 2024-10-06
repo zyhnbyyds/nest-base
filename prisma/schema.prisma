@@ -10,7 +10,6 @@ datasource db {
 model User {
   userId        String    @id @map("user_id")
   openId        String    @unique @map("open_id")
-  unionId       String?   @map("union_id")
   nickname      String?   @map("nickname")
   avatarUrl     String?   @map("avatar_url")
   gender        Int       @default(0) @map("gender")
@@ -23,8 +22,8 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   isDelete      Boolean?  @default(false) @map("is_delete")
-
-  @@index([unionId], map: "union_id_index")
+  email         String    @unique @map("email") @db.VarChar(20)
+  password      String    @map("password") @db.VarChar(30)
   @@map("user")
 }
 
@@ -53,5 +52,10 @@ model Log {
   
   createdAt    DateTime @default(now())              // 日志生成时间，自动记录
   updatedAt    DateTime @updatedAt                   // 日志更新时间，记录最后修改时间
+
+  @@index([requestId])
+  @@index([traceId])
+  @@index([spanId])
+  @@index([parentSpanId])
 }
 

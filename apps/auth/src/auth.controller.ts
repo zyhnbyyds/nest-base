@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common'
+import { ZodValidationPipe } from '@anatine/zod-nestjs'
+import { Body, Controller, Post, UsePipes } from '@nestjs/common'
 import { AuthService } from './auth.service'
+import { EmailRegisterDto } from './dto/register.dto'
 
-@Controller()
+@Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Get()
-  getHello(): string {
-    return this.authService.getHello()
+  @Post('/registerUseEmail')
+  @UsePipes(ZodValidationPipe)
+  registerUseEmail(@Body() body: EmailRegisterDto) {
+    return this.authService.registerUseEmail(body)
   }
 }

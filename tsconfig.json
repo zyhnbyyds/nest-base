@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "ES2021",
+    "target": "ESNext",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "baseUrl": "./",
-    "module": "commonjs",
+    "module": "CommonJS",
     "paths": {
       "common/common": [
         "libs/common/src"
@@ -14,6 +14,7 @@
         "libs/common/src/*"
       ]
     },
+    "strict": true,
     "strictBindCallApply": false,
     "strictNullChecks": false,
     "noFallthroughCasesInSwitch": false,
