@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
-import { SubAppPortEnum } from 'common/common/enums/subapps'
+import { SubAppPortEnum, SubAppRoutePrefixEnum } from 'common/common/enums/subapps'
 import { FastifyInstance } from 'fastify'
 import { CoreModule } from './core.module'
 
@@ -12,8 +12,8 @@ async function bootstrap() {
         target: '@fastify/one-line-logger',
       },
     },
-    prefix: '/core',
   }))
+  app.setGlobalPrefix(SubAppRoutePrefixEnum.Core)
   await app.listen(SubAppPortEnum.Core)
 }
 bootstrap()

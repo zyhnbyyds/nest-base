@@ -26,6 +26,17 @@ export enum SubAppPortEnum {
   Core = 3001,
   Logger = 3004,
   Email = 3006,
+  Redis = 6379,
+}
+
+/**
+ * 子应用 host
+ */
+export enum SubAppHostEnum {
+  Auth = 'localhost1',
+  Core = 'localhost2',
+  Logger = 'localhost:3004',
+  Email = 'localhost:3006',
 }
 
 /** 微服务事件 */
@@ -38,6 +49,8 @@ export enum MicroServicesEventEnum {
 export enum MicroServiceMessageEnum {
   /** 发邮件 */
   SEND_EMAIL = 'message~send_email',
+  /** redis命令 */
+  REDIS_CMD = 'message~redis_cmd',
 }
 
 /**
@@ -48,4 +61,8 @@ export enum MicroServiceNameEnum {
   LOGGER_SERVICE = 'logger_service',
   /** 邮件微服务 */
   EMAIL_SERVICE = 'email_service',
+  /** Redis微服务 */
+  REDIS_SERVICE = 'redis_service',
 }
+
+export const LocalHost = 'localhost'

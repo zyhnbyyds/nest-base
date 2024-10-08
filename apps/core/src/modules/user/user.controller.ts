@@ -16,9 +16,8 @@ export class UserController {
 
   @Post()
   async create(@Body() createUserDto: User, @Req() req: FastifyRequest) {
-    this.client.connect().then(() => {
-      this.client.emit(MicroServicesEventEnum.WRITE_LOG, transReqToLogRecord(req))
-    })
+    await this.client.connect()
+    this.client.emit(MicroServicesEventEnum.WRITE_LOG, transReqToLogRecord(req))
 
     const snowflake = new Snowflake(1, 1)
     return await this.userService.create({ ...createUserDto, openId: snowflake.generateId(), userId: snowflake.generateId() })
