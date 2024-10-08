@@ -37,7 +37,7 @@
     "@nestjs/swagger": "^7.4.2",
     "@nestjs/websockets": "^10.4.4",
     "@prisma/client": "^5.20.0",
-    "cache-manager": "^5.7.6",
+    "cache-manager": "^6.0.0",
     "fastify": "^5.0.0",
     "ioredis": "^5.4.1",
     "keyv": "^5.1.0",
