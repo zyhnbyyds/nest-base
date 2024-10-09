@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common'
+import RedisFactory from './factories/redis.factory'
 import { PrismaService } from './services/prisma.service'
 
 /**
@@ -6,7 +7,7 @@ import { PrismaService } from './services/prisma.service'
  */
 @Global()
 @Module({
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [PrismaService, RedisFactory],
+  exports: [PrismaService, RedisFactory],
 })
 export class CommonModule {}

@@ -16,11 +16,10 @@
     "compodoc:init": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 --language zh-CN",
     "run:auth": "npm-run-all --parallel dev:auth micro:email micro:logger",
     "run:core": "npm-run-all --parallel dev:core micro:logger",
-    "run:micro": "npm-run-all -p micro:email micro:logger micro:redis",
+    "run:micro": "npm-run-all -p micro:email micro:logger",
     "run:all": "npm-run-all -p run:micro dev:core dev:auth",
     "micro:logger": "nest start logger --watch",
-    "micro:email": "nest start email --watch",
-    "micro:redis": "nest start redis --watch"
+    "micro:email": "nest start email --watch"
   },
   "dependencies": {
     "@anatine/zod-nestjs": "^2.0.9",
