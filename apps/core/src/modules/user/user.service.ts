@@ -1,6 +1,8 @@
+import { PrismaService } from '@libs/common/services/prisma.service'
+import { WLogger } from '@libs/common/utils/logger'
+import { Result } from '@libs/common/utils/result'
 import { Injectable } from '@nestjs/common'
 import { User } from '@prisma/client'
-import { PrismaService } from 'common/common/services/prisma.service'
 
 @Injectable()
 export class UserService {
@@ -10,8 +12,9 @@ export class UserService {
     return await this.prisma.user.create({ data: createUserDto, select: { userId: true, openId: true } })
   }
 
-  findAll() {
-    return this.prisma.user.findMany()
+  async findAll() {
+    const userList = await this.prisma.user.findMany()
+    return Result.success(userList)
   }
 
   findOne(userId: string) {

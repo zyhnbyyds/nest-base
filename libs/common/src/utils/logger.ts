@@ -1,4 +1,8 @@
+import { pid } from 'node:process'
+import * as dayjs from 'dayjs'
 import { FastifyRequest } from 'fastify'
+import { addColors, createLogger, format, transports } from 'winston'
+import { SubAppPortEnum } from '../enums/subapps'
 
 export interface LogExtraMsg {
   message: string
@@ -34,3 +38,59 @@ export function transReqToLogRecord(request: FastifyRequest, options: Partial<Lo
     createdAt: new Date(), // 日志创建时间
   }
 }
+
+const { label, colorize, timestamp, splat, json, prettyPrint, printf } = format
+
+addColors({
+  error: 'red bold',
+  warn: 'yellow bold',
+  info: 'green',
+  http: 'magenta',
+  verbose: 'cyan',
+  debug: 'blue',
+})
+
+/**
+ * winston logger instance
+ */
+export const WLogger = createLogger({
+  format: format.combine(
+    label({ label: 'Nest' }),
+    colorize(),
+    timestamp(),
+    json(),
+    colorize(),
+    splat(),
+    prettyPrint(),
+    printf(({ level, message, timestamp, label }) => {
+      return `[${label}] ${pid}  - ${dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')}     ${level} ${typeof message === 'object' ? JSON.stringify(message) : message}`
+    }),
+  ),
+
+  handleExceptions: true,
+  handleRejections: true,
+  transports: [
+    new transports.Console(),
+    new transports.File({ filename: 'error.log', level: 'error', dirname: 'logs' }),
+    new transports.File({ filename: 'debug.log', level: 'debug', dirname: 'logs' }),
+    new transports.Http({
+      path: '/logger',
+      host: 'localhost',
+      port: SubAppPortEnum.Logger,
+    }),
+  ],
+
+  rejectionHandlers: [
+    new transports.File({
+      filename: 'rejection.log',
+      dirname: 'logs',
+    }),
+  ],
+
+  exceptionHandlers: [
+    new transports.File({
+      filename: 'exception.log',
+      dirname: 'logs',
+    }),
+  ],
+})

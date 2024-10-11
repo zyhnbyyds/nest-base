@@ -26,7 +26,7 @@ export class Result {
     return this.getResult(null, message, DEFAULT_SUCCESS_RESULT_CODE)
   }
 
-  static fail(message: string, code: number = DEFAULT_ERROR_RESULT_CODE) {
+  static fail(message: any, code: number = DEFAULT_ERROR_RESULT_CODE) {
     return this.getResult(null, message, code)
   }
 }

@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req } from '@nestjs/common'
+import { MicroServiceNameEnum, MicroServicesEventEnum } from '@libs/common/enums/subapps'
+import { transReqToLogRecord } from '@libs/common/utils/logger'
+import { Snowflake } from '@libs/common/utils/snow-flake'
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req, UsePipes } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
+import { seconds, Throttle } from '@nestjs/throttler'
 import { User } from '@prisma/client'
-import { MicroServiceNameEnum, MicroServicesEventEnum } from 'common/common/enums/subapps'
-import { transReqToLogRecord } from 'common/common/utils/logger'
-import { Snowflake } from 'common/common/utils/snow-flake'
 import { FastifyRequest } from 'fastify'
+import { CreateUserDto } from './dto/createUser.dto'
 import { UserService } from './user.service'
 
 @Controller('user')
@@ -15,14 +17,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() createUserDto: User, @Req() req: FastifyRequest) {
+  async create(@Body() createUserDto: CreateUserDto, @Req() req: FastifyRequest) {
     await this.client.connect()
     this.client.emit(MicroServicesEventEnum.WRITE_LOG, transReqToLogRecord(req))
 
     const snowflake = new Snowflake(1, 1)
-    return await this.userService.create({ ...createUserDto, openId: snowflake.generateId(), userId: snowflake.generateId() })
+    return await this.userService.create({ ...(createUserDto as unknown as User), openId: snowflake.generateId(), userId: snowflake.generateId() })
   }
 
+  @Throttle({ default: { ttl: seconds(30), limit: 1 } })
   @Get()
   findAll() {
     return this.userService.findAll()

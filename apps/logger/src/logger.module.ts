@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { CommonModule } from 'common/common'
+import { CommonModule } from '@libs/common'
 import { RecordModule } from './record/record.module'
 
 @Module({

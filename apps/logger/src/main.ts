@@ -1,6 +1,7 @@
+import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
-import { SubAppPortEnum } from 'common/common/enums/subapps'
+import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { LoggerModule } from './logger.module'
 
 async function bootstrap() {
@@ -11,5 +12,6 @@ async function bootstrap() {
     },
   })
   await app.listen()
+  Logger.log(`micro-logger running on the ${SubAppPortEnum.Logger}`)
 }
 bootstrap()

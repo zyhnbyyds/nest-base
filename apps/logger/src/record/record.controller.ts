@@ -1,8 +1,8 @@
 import { Catch, Controller } from '@nestjs/common'
 import { EventPattern, Payload } from '@nestjs/microservices'
 import { Log } from '@prisma/client'
-import { MicroServicesEventEnum } from 'common/common/enums/subapps'
-import { PrismaService } from 'common/common/services/prisma.service'
+import { MicroServicesEventEnum } from '@libs/common/enums/subapps'
+import { PrismaService } from '@libs/common/services/prisma.service'
 
 @Catch()
 @Controller()

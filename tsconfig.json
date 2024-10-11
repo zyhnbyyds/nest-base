@@ -7,13 +7,20 @@
     "baseUrl": "./",
     "module": "CommonJS",
     "paths": {
-      "common/common": [
+      "@libs/common": [
         "libs/common/src"
       ],
-      "common/common/*": [
+      "@libs/common/*": [
         "libs/common/src/*"
+      ],
+      "@test/test": [
+        "libs/test/src"
+      ],
+      "@test/test/*": [
+        "libs/test/src/*"
       ]
     },
+    "typeRoots": ["libs/common/types"],
     "strict": true,
     "strictBindCallApply": false,
     "strictNullChecks": false,

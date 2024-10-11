@@ -1,8 +1,8 @@
+import { CommonModule } from '@libs/common'
+import { EmailModuleRegister, LoggerModuleRegister, RedisModuleRegister } from '@libs/common/config/module-register'
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ClientsModule } from '@nestjs/microservices'
-import { CommonModule } from 'common/common'
-import { EmailModuleRegister, LoggerModuleRegister, RedisCacheModuleRegister, RedisModuleRegister } from 'common/common/config/module-register'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 
@@ -15,7 +15,6 @@ import { AuthService } from './auth.service'
       LoggerModuleRegister,
       RedisModuleRegister,
     ]),
-    RedisCacheModuleRegister,
   ],
   controllers: [AuthController],
   providers: [AuthService],

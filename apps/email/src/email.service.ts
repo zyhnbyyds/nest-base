@@ -1,26 +1,15 @@
+import { EMAIL_CODE_EXPIRE_TIME } from '@libs/common/config/constant'
+import { FactoryName } from '@libs/common/enums/factory'
+import { MicroServiceNameEnum } from '@libs/common/enums/subapps'
+import { combineEmailOptions } from '@libs/common/utils/email'
 import { Inject, Injectable } from '@nestjs/common'
-import { EMAIL_CODE_EXPIRE_TIME } from 'common/common/config/constant'
-import { FactoryName } from 'common/common/enums/factory'
-import { MicroServiceNameEnum } from 'common/common/enums/subapps'
-import { combineEmailOptions } from 'common/common/utils/email'
 import Redis from 'ioredis'
-import { createTransport, Transporter } from 'nodemailer'
+import { Transporter } from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer'
-import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 @Injectable()
 export class EmailService {
-  private transporter: Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options>
-  constructor(@Inject(FactoryName.RedisFactory) private redis: Redis) {
-    this.transporter = createTransport({
-      host: 'smtp.163.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    })
+  constructor(@Inject(FactoryName.RedisFactory) private redis: Redis, @Inject(FactoryName.TransportFactory) private transporter: Transporter) {
   }
 
   async sendEmail(info: Mail.Options) {

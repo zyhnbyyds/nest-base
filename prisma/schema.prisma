@@ -8,23 +8,31 @@ datasource db {
 }
 
 model User {
-  userId        String    @id @map("user_id")
-  openId        String    @unique @map("open_id")
-  nickname      String?   @map("nickname")
-  avatarUrl     String?   @map("avatar_url")
-  gender        Int       @default(0) @map("gender")
+  userId        String    @id @map("user_id") @db.VarChar(20)
+  openId        String    @unique @map("open_id") @db.VarChar(20)
+  nickname      String    @map("nickname") @db.VarChar(20)
+  avatarUrl     String    @map("avatar_url") @db.VarChar(100)
+  gender        String    @map("gender") @db.Char(6)
   language      String    @default("zh_CN") @map("language")
-  city          String?   @map("city")
-  province      String?   @map("province")
-  country       String?   @map("country")
-  phone         String?   @map("phone_number")
+  province      String?   @map("province") @db.VarChar(10)
+  country       String?   @map("country") @db.VarChar(10)
+  phone         String    @map("phone_number") @db.VarChar(32)
   lastLoginTime DateTime? @map("last_login_time")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   isDelete      Boolean?  @default(false) @map("is_delete")
   email         String    @unique @map("email") @db.VarChar(20)
-  password      String    @map("password") @db.VarChar(30)
+  password      String    @map("password") @db.VarChar(60)
   @@map("user")
+}
+
+model RegisterUser {
+  userId       String   @id @map("user_id")
+  registerTime DateTime @default(now()) @map("register_time")
+  isDelete     Boolean? @default(false) @map("is_delete")
+  status       Int?      @default(0)
+  
+  @@map("register_user")
 }
 
 model Log {
