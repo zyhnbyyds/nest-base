@@ -22,7 +22,7 @@
     "micro:email": "nest start email --watch"
   },
   "dependencies": {
-    "@fastify/csrf-protection": "^6.4.1",
+    "@fastify/csrf-protection": "^7.0.0",
     "@fastify/one-line-logger": "^2.0.0",
     "@fastify/secure-session": "^7.5.1",
     "@fastify/static": "^8.0.1",
