@@ -1,4 +1,6 @@
+import { AuthJwtGuard } from '@libs/common/guards/jwt.guard'
 import { Module } from '@nestjs/common'
+import { APP_GUARD } from '@nestjs/core'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
@@ -10,6 +12,9 @@ import { UserService } from './user.service'
     ],
   )],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, {
+    provide: APP_GUARD,
+    useClass: AuthJwtGuard,
+  }],
 })
 export class UserModule {}

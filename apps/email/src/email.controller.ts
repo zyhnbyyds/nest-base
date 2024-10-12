@@ -1,6 +1,6 @@
+import { MicroServiceMessageEnum } from '@libs/common/enums/subapps'
 import { Controller } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { MicroServiceMessageEnum } from '@libs/common/enums/subapps'
 import { Options } from 'nodemailer/lib/mailer'
 import { EmailService } from './email.service'
 

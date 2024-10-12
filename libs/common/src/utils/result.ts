@@ -1,4 +1,5 @@
 import { DEFAULT_ERROR_RESULT_CODE, DEFAULT_SUCCESS_RESULT_CODE, DEFAULT_SUCCESS_RESULT_MSG } from '../config/constant'
+import { CommonErrorMsg } from '../enums/error'
 
 /**
  * common result 通用返回
@@ -26,7 +27,7 @@ export class Result {
     return this.getResult(null, message, DEFAULT_SUCCESS_RESULT_CODE)
   }
 
-  static fail(message: any, code: number = DEFAULT_ERROR_RESULT_CODE) {
+  static fail(message: any = CommonErrorMsg.UnknownError, code: number = DEFAULT_ERROR_RESULT_CODE) {
     return this.getResult(null, message, code)
   }
 }

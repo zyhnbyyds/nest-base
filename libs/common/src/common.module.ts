@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { databaseConfig, emailConfig, redisConfig } from './config'
+import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
 import RedisFactory from './factories/redis.factory'
 import { PrismaService } from './services/prisma.service'
 import { getEnv } from './utils/env'
@@ -14,7 +14,7 @@ import { getEnv } from './utils/env'
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [redisConfig, emailConfig, databaseConfig],
+      load: [redisConfig, emailConfig, databaseConfig, jwtConfig],
       envFilePath: ['.env', `.env.${getEnv('NODE_ENV')}`],
     }),
   ],

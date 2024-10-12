@@ -1,7 +1,6 @@
 import { MicroServiceNameEnum, MicroServicesEventEnum } from '@libs/common/enums/subapps'
 import { transReqToLogRecord } from '@libs/common/utils/logger'
-import { Snowflake } from '@libs/common/utils/snow-flake'
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req, UsePipes } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { seconds, Throttle } from '@nestjs/throttler'
 import { User } from '@prisma/client'
@@ -21,8 +20,7 @@ export class UserController {
     await this.client.connect()
     this.client.emit(MicroServicesEventEnum.WRITE_LOG, transReqToLogRecord(req))
 
-    const snowflake = new Snowflake(1, 1)
-    return await this.userService.create({ ...(createUserDto as unknown as User), openId: snowflake.generateId(), userId: snowflake.generateId() })
+    return await this.userService.create(createUserDto)
   }
 
   @Throttle({ default: { ttl: seconds(30), limit: 1 } })
@@ -44,5 +42,10 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id)
+  }
+
+  @Post('/createUserFromRegisterUser')
+  createUserFromRegisterUser(@Body() user: CreateUserDto) {
+    return this.userService.create(user, false)
   }
 }

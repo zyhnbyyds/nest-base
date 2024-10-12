@@ -1,12 +1,19 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, HttpCode, Post } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { EmailRegisterDto } from './dto/register.dto'
+import { EmailRegisterDto, EmailVerifyDto } from './dto/register.dto'
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  @Post('/registerUseEmail')
-  registerUseEmail(@Body() body: EmailRegisterDto) {
-    return this.authService.registerUseEmail(body)
+  @HttpCode(200)
+  @Post('/sendEmailCode')
+  sendEmailCode(@Body() body: EmailRegisterDto) {
+    return this.authService.sendEmailCode(body)
+  }
+
+  @HttpCode(200)
+  @Post('/loginUseEmail')
+  loginUseEmail(@Body() body: EmailVerifyDto) {
+    return this.authService.loginUseEmail(body)
   }
 }

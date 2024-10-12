@@ -1,10 +1,7 @@
 import { Transform } from 'class-transformer'
-import { IsEmail, IsEnum, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator'
+import { IsEmail, IsEnum, IsOptional, IsString, IsUrl, Length, MaxLength, MinLength } from 'class-validator'
 
-export class CreateUserDto {
-  @IsEmail()
-  email: string
-
+export class CreateUserDtoWithoutEmail {
   @IsString({ message: '密码长度在6-32位' })
   @MinLength(6)
   @MaxLength(32)
@@ -29,14 +26,24 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   @MaxLength(10)
-  province?: string
+  province: string | null
 
   @IsString()
   @IsOptional()
   @MaxLength(10)
-  country?: string
+  country: string | null
 
   @IsString()
   @MaxLength(32)
   phone: string
+
+  @Length(17)
+  @IsString()
+  @IsOptional()
+  userId: string | null
+}
+
+export class CreateUserDto extends CreateUserDtoWithoutEmail {
+  @IsEmail()
+  email: string
 }

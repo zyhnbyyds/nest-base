@@ -14,8 +14,9 @@ export interface EmailConfig {
 }
 
 export interface AuthConfig {
-  jwtSecret: string
-  jwtExpire: string
+  secret: string
+  expiresIn: string
+  expireTime: number
 }
 
 export interface DatabaseConfig {

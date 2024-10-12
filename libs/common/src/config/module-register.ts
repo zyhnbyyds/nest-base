@@ -1,6 +1,9 @@
 import { CacheModule } from '@nestjs/cache-manager'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { JwtModule } from '@nestjs/jwt'
 import { ClientProviderOptions, Transport } from '@nestjs/microservices'
 import { LocalHost, MicroServiceNameEnum, SubAppPortEnum } from '../enums/subapps'
+import { AuthConfig } from './interface'
 
 /**
  * 邮件注册模块
@@ -40,3 +43,22 @@ export const RedisModuleRegister: ClientProviderOptions = {
     host: LocalHost,
   },
 }
+
+// 动态模块
+/**
+ * JWT注册
+ */
+export const JwtModuleImport = JwtModule.registerAsync({
+  imports: [ConfigModule],
+  global: true,
+  useFactory: (configService: ConfigService) => {
+    const { secret, expiresIn } = configService.get<AuthConfig>('jwt')
+    return {
+      secret,
+      signOptions: {
+        expiresIn,
+      },
+    }
+  },
+  inject: [ConfigService],
+})
