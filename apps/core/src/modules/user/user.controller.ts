@@ -1,4 +1,5 @@
 import { MicroServiceNameEnum, MicroServicesEventEnum } from '@libs/common/enums/subapps'
+import { FastifyRequestWithAuth } from '@libs/common/types/interface'
 import { transReqToLogRecord } from '@libs/common/utils/logger'
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
@@ -32,6 +33,11 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id)
+  }
+
+  @Get('/userInfo')
+  userInfo(@Req() req: FastifyRequestWithAuth) {
+    return this.userService.findOne(req.verify.userId)
   }
 
   @Patch(':id')

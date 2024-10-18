@@ -80,17 +80,17 @@ export const WLogger = createLogger({
     }),
   ],
 
-  rejectionHandlers: [
-    new transports.File({
-      filename: 'rejection.log',
-      dirname: 'logs',
-    }),
-  ],
+  // rejectionHandlers: [
+  //   new transports.File({
+  //     filename: 'rejection.log',
+  //     dirname: 'logs',
+  //   }),
+  // ],
 
-  exceptionHandlers: [
-    new transports.File({
-      filename: 'exception.log',
-      dirname: 'logs',
-    }),
-  ],
+  // exceptionHandlers: [
+  //   new transports.File({
+  //     filename: 'exception.log',
+  //     dirname: 'logs',
+  //   }),
+  // ],
 })

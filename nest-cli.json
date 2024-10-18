@@ -5,7 +5,8 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "tsConfigPath": "apps/core/tsconfig.app.json",
-    "webpack": true
+    "webpack": true,
+    "webpackConfigPath": "webpack.config.js"
   },
   "monorepo": true,
   "root": "apps/core",
@@ -17,6 +18,7 @@
       "sourceRoot": "apps/core/src",
       "compilerOptions": {
         "tsConfigPath": "apps/core/tsconfig.app.json"
+
       }
     },
     "gateway": {
@@ -72,6 +74,18 @@
       "compilerOptions": {
         "tsConfigPath": "libs/test/tsconfig.lib.json"
       }
+    },
+    "mongo": {
+      "type": "library",
+      "root": "clients/mongo",
+      "entryFile": "index",
+      "sourceRoot": "clients/mongo"
+    },
+    "mysql": {
+      "type": "library",
+      "root": "clients/mysql",
+      "entryFile": "index",
+      "sourceRoot": "clients/mysql"
     }
   }
 }

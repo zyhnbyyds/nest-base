@@ -5,7 +5,7 @@ import { RedisCacheKey } from '@libs/common/enums/redis'
 import { MicroServiceMessageEnum, MicroServiceNameEnum } from '@libs/common/enums/subapps'
 import { SuccessMsg } from '@libs/common/enums/success'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
-import { PrismaService } from '@libs/common/services/prisma.service'
+import { MysqlService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
@@ -13,7 +13,6 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { ClientProxy } from '@nestjs/microservices'
 import Redis from 'ioredis'
-import { omit } from 'lodash'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { lastValueFrom } from 'rxjs'
 import { EmailRegisterDto, EmailVerifyDto } from './dto/register.dto'
@@ -21,7 +20,7 @@ import { EmailRegisterDto, EmailVerifyDto } from './dto/register.dto'
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaService: PrismaService,
+    private mysqlService: MysqlService,
 
     @Inject(MicroServiceNameEnum.EMAIL_SERVICE)
     private emailApp: ClientProxy,
@@ -48,29 +47,28 @@ export class AuthService {
 
     this.delEmailCode(body.email)
     // if has registered return register info
-    const registeredUser = await this.prismaService.registerUser.findUnique({ where: { email: body.email }, select: { userId: true, status: true, email: true } })
-    if (registeredUser) {
-      this.delEmailCode(body.email)
-      const token = await this.jwtService.signAsync({ email: body.email, userId: registeredUser.userId })
+    let registeredUser = await this.mysqlService.registerUser.findUnique({ where: { email: body.email }, select: { userId: true, status: true, email: true } })
 
-      if (registeredUser.status === RegisterUserStatus.NotAddUserInfo) {
-        await this.setToken(token, registeredUser.userId)
-        return Result.success({ verify: omit(registeredUser, ['status']), token })
-      }
-
-      else if (registeredUser.status === RegisterUserStatus.Success) {
-        const user = await this.prismaService.user.findUnique({ where: { userId: registeredUser.userId }, select: { userId: true, email: true } })
-        await this.setToken(token, registeredUser.userId)
-        return Result.success({ verify: user, token })
-      }
-      else {
-        return Result.fail()
-      }
+    if (!registeredUser) {
+      registeredUser = await this.mysqlService.registerUser.create({ data: { email: body.email, userId: new Snowflake(1, 1).generateId(), status: RegisterUserStatus.NotAddUserInfo }, select: { userId: true, status: true, email: true } })
     }
 
-    await this.prismaService.registerUser.create({ data: { email: body.email, userId: new Snowflake(1, 1).generateId(), status: RegisterUserStatus.NotAddUserInfo } })
+    this.delEmailCode(body.email)
+    const token = await this.generateToken(body.email, registeredUser.userId)
 
-    return Result.ok(SuccessMsg.EmailVerifySuccess)
+    if (registeredUser.status === RegisterUserStatus.NotAddUserInfo) {
+      await this.setToken(token, registeredUser.userId)
+      return Result.success({ verify: registeredUser, token })
+    }
+
+    else if (registeredUser.status === RegisterUserStatus.Success) {
+      const user = await this.mysqlService.user.findUnique({ where: { userId: registeredUser.userId }, select: { userId: true, email: true } })
+      await this.setToken(token, registeredUser.userId)
+      return Result.success({ verify: { ...user, status: 0 }, token })
+    }
+    else {
+      return Result.fail()
+    }
   }
 
   delEmailCode(email: string) {
@@ -80,5 +78,9 @@ export class AuthService {
   setToken(token: string, userId: string) {
     const { expireTime } = this.configService.get<AuthConfig>('jwt')
     return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', expireTime)
+  }
+
+  generateToken(email: string, userId: string) {
+    return this.jwtService.signAsync({ email, userId })
   }
 }

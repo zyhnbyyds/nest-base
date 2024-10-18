@@ -5,4 +5,8 @@ export default antfu({
     'ts/consistent-type-imports': 'off',
     'node/prefer-global/process': 'off',
   },
+  ignores: [
+    'clients/mongo',
+    'clients/mysql',
+  ],
 })

@@ -1,10 +1,9 @@
-import { Provider } from '@nestjs/common'
 import Redis from 'ioredis'
 import { redisConfig } from '../config'
 import { RedisConfig } from '../config/interface'
 import { FactoryName } from '../enums/factory'
 
-const RedisFactory: Provider = {
+const RedisFactory = {
   provide: FactoryName.RedisFactory,
   useFactory: () => {
     const { port, host } = redisConfig() as RedisConfig

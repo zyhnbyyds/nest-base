@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "../clients/mysql"
 }
 
 datasource db {
@@ -66,5 +67,47 @@ model Log {
   @@index([traceId])
   @@index([spanId])
   @@index([parentSpanId])
+  @@map("log")
+}
+
+model ImUser {
+  userId       String   @id @map("user_id")
+  status       Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDelete     Boolean? @default(false)
+  @@map("im_user")
+}
+
+model ImGroup {
+  groupId      String   @id @map("group_id")
+  status       Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDelete     Boolean? @default(false)
+  @@map("im_group")
+}
+
+model ImGroupMember {
+  groupId      String   @map("group_id")
+  userId       String   @map("user_id")
+  status       Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  @@id([groupId, userId])
+  @@map("im_group_member")
+}
+
+model ImMessage {
+  messageId    String   @id @map("message_id")
+  fromUserId   String   @map("from_user_id")
+  toUserId     String   @map("to_user_id")
+  content      String   @map("content") @db.VarChar(500)
+  type         Int?     @default(0)
+  status       Int?     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDelete     Boolean? @default(false)
+  @@map("im_message")
 }
 

@@ -18,9 +18,14 @@
       ],
       "@test/test/*": [
         "libs/test/src/*"
+      ],
+      "@clients/mongo": [
+        "clients/mongo"
+      ],
+      "@clients/mysql": [
+        "clients/mysql"
       ]
     },
-    "typeRoots": ["libs/common/types"],
     "strict": true,
     "strictBindCallApply": false,
     "strictNullChecks": false,

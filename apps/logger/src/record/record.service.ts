@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { CreateRecordDto } from './dto/create-record.dto'
-import { UpdateRecordDto } from './dto/update-record.dto'
 
 @Injectable()
 export class RecordService {
-  create(createRecordDto: CreateRecordDto) {
+  create() {
     return 'This action adds a new record'
   }
 
@@ -16,7 +14,7 @@ export class RecordService {
     return `This action returns a #${id} record`
   }
 
-  update(id: number, updateRecordDto: UpdateRecordDto) {
+  update(id: number) {
     return `This action updates a #${id} record`
   }
 

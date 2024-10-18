@@ -1,6 +1,6 @@
 import { UserErrorMsg } from '@libs/common/enums/error'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
-import { PrismaService } from '@libs/common/services/prisma.service'
+import { MysqlService } from '@libs/common/services/prisma.service'
 import { YYYYMMDDHHmmss } from '@libs/common/utils/dayjs'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
@@ -10,7 +10,7 @@ import { CreateUserDto } from './dto/createUser.dto'
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: MysqlService) {}
 
   async create(createUserDto: CreateUserDto, isAutoGenUserId = true) {
     const snowflake = new Snowflake(1, 1)
@@ -51,8 +51,12 @@ export class UserService {
     return Result.success(userList)
   }
 
-  findOne(userId: string) {
-    return this.prisma.user.findUniqueOrThrow({ where: { userId } })
+  async findOne(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { userId } })
+    if (!user) {
+      return Result.fail(UserErrorMsg.UserNotFound)
+    }
+    return Result.success(user)
   }
 
   update(userId: string, updateUserDto: User) {

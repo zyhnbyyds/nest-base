@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { FastifyReply, FastifyRequest } from 'fastify'
+import { isObject } from 'lodash'
 import { WLogger } from '../utils/logger'
 import { Result } from '../utils/result'
 
@@ -22,7 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     WLogger.error(
       `${request.method} ${request.url} reason -> ${
-        exception
+        isObject(exception) ? JSON.stringify(exception) : exception
       }`,
     )
     response.status(status).send(Result.fail(exception, status))

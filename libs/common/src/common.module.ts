@@ -1,10 +1,8 @@
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { APP_GUARD } from '@nestjs/core'
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
 import RedisFactory from './factories/redis.factory'
-import { PrismaService } from './services/prisma.service'
+import { MysqlService } from './services/prisma.service'
 import { getEnv } from './utils/env'
 
 /**
@@ -19,14 +17,25 @@ import { getEnv } from './utils/env'
       load: [redisConfig, emailConfig, databaseConfig, jwtConfig],
       envFilePath: ['.env', `.env.${getEnv('NODE_ENV')}`],
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 10000,
-        limit: 3,
-      },
-    ]),
+    // TODO: fix 修复在微服务调用情况下的rate limit报错
+    // ThrottlerModule.forRootAsync({
+    //   useFactory() {
+    //     const redis = RedisFactory.useFactory()
+    //     return {
+    //       storage: new ThrottlerStorageRedisService(redis),
+    //       throttlers: [
+    //         {
+    //           limit: 300,
+    //           ttl: 20000,
+    //         },
+    //       ],
+    //     }
+    //   },
+    // }),
+
+    // , { provide: APP_GUARD, useClass: ThrottlerGuard }
   ],
-  providers: [PrismaService, RedisFactory, { provide: APP_GUARD, useClass: ThrottlerGuard }],
-  exports: [PrismaService, RedisFactory],
+  providers: [MysqlService, RedisFactory],
+  exports: [MysqlService, RedisFactory],
 })
 export class CommonModule {}
