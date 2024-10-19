@@ -2,8 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
 import RedisFactory from './factories/redis.factory'
-import { MysqlService } from './services/prisma.service'
-import { getEnv } from './utils/env'
+import { MongoService, MysqlService } from './services/prisma.service'
 
 /**
  * Common module 通用模块
@@ -15,7 +14,7 @@ import { getEnv } from './utils/env'
       isGlobal: true,
       cache: true,
       load: [redisConfig, emailConfig, databaseConfig, jwtConfig],
-      envFilePath: ['.env', `.env.${getEnv('NODE_ENV')}`],
+      envFilePath: ['.env', `.env.${process.env.NODE_ENV}`],
     }),
     // TODO: fix 修复在微服务调用情况下的rate limit报错
     // ThrottlerModule.forRootAsync({
@@ -35,7 +34,7 @@ import { getEnv } from './utils/env'
 
     // , { provide: APP_GUARD, useClass: ThrottlerGuard }
   ],
-  providers: [MysqlService, RedisFactory],
-  exports: [MysqlService, RedisFactory],
+  providers: [MysqlService, MongoService, RedisFactory],
+  exports: [MysqlService, MongoService, RedisFactory],
 })
 export class CommonModule {}

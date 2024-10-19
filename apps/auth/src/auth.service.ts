@@ -76,8 +76,8 @@ export class AuthService {
   }
 
   setToken(token: string, userId: string) {
-    const { expireTime } = this.configService.get<AuthConfig>('jwt')
-    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', expireTime)
+    const { expiresIn } = this.configService.get<AuthConfig>('jwt')
+    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', expiresIn)
   }
 
   generateToken(email: string, userId: string) {

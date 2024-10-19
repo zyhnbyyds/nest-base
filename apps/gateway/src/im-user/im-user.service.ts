@@ -1,11 +1,11 @@
-import { MysqlService } from '@libs/common/services/prisma.service'
+import { MongoService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Injectable } from '@nestjs/common'
 import { CreateImUserDto } from './dto/create-im-user.dto'
 
 @Injectable()
 export class ImUserService {
-  constructor(private prisma: MysqlService) {}
+  constructor(private prisma: MongoService) {}
 
   async login(userId: string) {
     const imUser = await this.findOne(userId)
@@ -24,7 +24,7 @@ export class ImUserService {
   }
 
   async findOne(userId: string) {
-    const imUser = await this.prisma.imUser.findUnique({ where: { userId } })
+    const imUser = await this.prisma.imUser.findUnique({ where: { userId, id: null } })
     return Result.success(imUser)
   }
 

@@ -1,4 +1,4 @@
-import { Log } from '@clients/mysql'
+import { Log } from 'packages/mysql'
 import { MicroServicesEventEnum } from '@libs/common/enums/subapps'
 import { MysqlService } from '@libs/common/services/prisma.service'
 import { Catch, Controller } from '@nestjs/common'

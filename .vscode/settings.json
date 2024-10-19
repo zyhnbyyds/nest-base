@@ -11,6 +11,7 @@
     ".git/objects",
     ".vscode",
     ".vscode-insiders",
-    "clients"
+    "packages/mysql",
+    "packages/mongo"
   ]
 }

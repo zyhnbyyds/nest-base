@@ -6,7 +6,7 @@ export default antfu({
     'node/prefer-global/process': 'off',
   },
   ignores: [
-    'clients/mongo',
-    'clients/mysql',
+    'packages/mongo',
+    'packages/mysql',
   ],
 })

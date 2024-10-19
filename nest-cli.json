@@ -18,7 +18,6 @@
       "sourceRoot": "apps/core/src",
       "compilerOptions": {
         "tsConfigPath": "apps/core/tsconfig.app.json"
-
       }
     },
     "gateway": {
@@ -65,27 +64,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/email/tsconfig.app.json"
       }
-    },
-    "test": {
-      "type": "library",
-      "root": "libs/test",
-      "entryFile": "index",
-      "sourceRoot": "libs/test/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/test/tsconfig.lib.json"
-      }
-    },
-    "mongo": {
-      "type": "library",
-      "root": "clients/mongo",
-      "entryFile": "index",
-      "sourceRoot": "clients/mongo"
-    },
-    "mysql": {
-      "type": "library",
-      "root": "clients/mysql",
-      "entryFile": "index",
-      "sourceRoot": "clients/mysql"
     }
   }
 }

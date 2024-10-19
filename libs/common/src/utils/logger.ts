@@ -1,8 +1,8 @@
 import { pid } from 'node:process'
-import * as dayjs from 'dayjs'
 import { FastifyRequest } from 'fastify'
 import { addColors, createLogger, format, transports } from 'winston'
 import { SubAppPortEnum } from '../enums/subapps'
+import { YYYYMMDDHHmmss } from './moment'
 
 export interface LogExtraMsg {
   message: string
@@ -63,7 +63,7 @@ export const WLogger = createLogger({
     splat(),
     prettyPrint(),
     printf(({ level, message, timestamp, label }) => {
-      return `[${label}] ${pid}  - ${dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss')}     ${level} ${typeof message === 'object' ? JSON.stringify(message) : message}`
+      return `[${label}] ${pid}  - ${YYYYMMDDHHmmss(timestamp)}     ${level} ${typeof message === 'object' ? JSON.stringify(message) : message}`
     }),
   ),
 

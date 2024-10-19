@@ -57,5 +57,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # docs
 apps-doc
-clients/mongo
-clients/mysql
+packages/mongo
+packages/mysql

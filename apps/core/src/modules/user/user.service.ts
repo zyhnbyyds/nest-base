@@ -1,11 +1,11 @@
 import { UserErrorMsg } from '@libs/common/enums/error'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
 import { MysqlService } from '@libs/common/services/prisma.service'
-import { YYYYMMDDHHmmss } from '@libs/common/utils/dayjs'
+import { YYYYMMDDHHmmss } from '@libs/common/utils/moment'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable } from '@nestjs/common'
-import { User } from '@prisma/client'
+import { User } from 'prisma-mysql'
 import { CreateUserDto } from './dto/createUser.dto'
 
 @Injectable()

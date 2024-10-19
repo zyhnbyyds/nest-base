@@ -16,7 +16,6 @@ export interface EmailConfig {
 export interface AuthConfig {
   secret: string
   expiresIn: string
-  expireTime: number
 }
 
 export interface DatabaseConfig {
