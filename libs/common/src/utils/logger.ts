@@ -1,6 +1,6 @@
 import { pid } from 'node:process'
 import { FastifyRequest } from 'fastify'
-import { addColors, createLogger, format, transports } from 'winston'
+import { addColors, format, type LoggerOptions, transports } from 'winston'
 import { SubAppPortEnum } from '../enums/subapps'
 import { YYYYMMDDHHmmss } from './moment'
 
@@ -50,10 +50,7 @@ addColors({
   debug: 'blue',
 })
 
-/**
- * winston logger instance
- */
-export const WLogger = createLogger({
+export const winstonLoggerOptions: LoggerOptions = {
   format: format.combine(
     label({ label: 'Nest' }),
     colorize(),
@@ -79,18 +76,4 @@ export const WLogger = createLogger({
       port: SubAppPortEnum.Logger,
     }),
   ],
-
-  // rejectionHandlers: [
-  //   new transports.File({
-  //     filename: 'rejection.log',
-  //     dirname: 'logs',
-  //   }),
-  // ],
-
-  // exceptionHandlers: [
-  //   new transports.File({
-  //     filename: 'exception.log',
-  //     dirname: 'logs',
-  //   }),
-  // ],
-})
+}

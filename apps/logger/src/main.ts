@@ -6,12 +6,12 @@ import { LoggerModule } from './logger.module'
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(LoggerModule, {
-    transport: Transport.TCP,
+    transport: Transport.NATS,
     options: {
-      port: SubAppPortEnum.Logger,
+      servers: 'nats://localhost:4222',
     },
   })
   await app.listen()
-  Logger.log(`micro-logger running on the ${SubAppPortEnum.Logger}`)
+  Logger.log(`micro-logger running on the ${SubAppPortEnum.Nats}`)
 }
 bootstrap()

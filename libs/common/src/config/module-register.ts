@@ -10,9 +10,9 @@ import { AuthConfig } from './interface'
  */
 export const EmailModuleRegister: ClientProviderOptions = {
   name: MicroServiceNameEnum.EMAIL_SERVICE,
-  transport: Transport.TCP,
+  transport: Transport.NATS,
   options: {
-    port: SubAppPortEnum.Email,
+    servers: 'nats://localhost:4222',
   },
 }
 

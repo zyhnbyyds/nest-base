@@ -1,10 +1,11 @@
 import fastifyCsrf from '@fastify/csrf-protection'
 import secureSession, { SecureSessionPluginOptions } from '@fastify/secure-session'
 import { AllExceptionsFilter } from '@libs/common/filters/all-exceptions.filter'
-import { WLogger } from '@libs/common/utils/logger'
-import { DynamicModule, Type, ValidationPipe } from '@nestjs/common'
+import { DynamicModule, Logger, Type, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import { WinstonModule } from 'nest-winston'
+import { winstonLoggerOptions } from './logger'
 
 export interface BootstrapOptions {
   name: string
@@ -39,7 +40,11 @@ export async function bootstrap(options: BootstrapOptions) {
   if (options.fastifyCsrf)
     await app.register(fastifyCsrf)
 
-  await app.listen(options.port)
+  app.useLogger(WinstonModule.createLogger(winstonLoggerOptions))
 
-  WLogger.info(`App${options.name} running on the ${options.port}`)
+  await app.listen({
+    port: options.port,
+  })
+
+  Logger.log(`App${options.name} running on the ${options.port}`)
 }

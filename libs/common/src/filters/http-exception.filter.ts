@@ -1,6 +1,5 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common'
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common'
 import { FastifyReply, FastifyRequest } from 'fastify'
-import { WLogger } from '../utils/logger'
 import { Result } from '../utils/result'
 
 @Catch(HttpException)
@@ -11,7 +10,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<FastifyRequest>()
     const status = exception.getStatus()
 
-    WLogger.error(
+    Logger.error(
       `error==>${request.method} ${request.url} reason==>${
         exception
       }`,

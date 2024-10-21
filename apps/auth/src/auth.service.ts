@@ -6,6 +6,7 @@ import { MicroServiceMessageEnum, MicroServiceNameEnum } from '@libs/common/enum
 import { SuccessMsg } from '@libs/common/enums/success'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
 import { MysqlService } from '@libs/common/services/prisma.service'
+import ms from '@libs/common/utils/ms'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
@@ -77,7 +78,7 @@ export class AuthService {
 
   setToken(token: string, userId: string) {
     const { expiresIn } = this.configService.get<AuthConfig>('jwt')
-    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', expiresIn)
+    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', ms(expiresIn))
   }
 
   generateToken(email: string, userId: string) {

@@ -6,14 +6,14 @@ import { EmailModule } from './email.module'
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(EmailModule, {
-    transport: Transport.TCP,
+    transport: Transport.NATS,
     options: {
-      port: SubAppPortEnum.Email,
+      servers: 'nats://localhost:4222',
     },
   })
 
   await app.listen()
 
-  Logger.log(`micro-email running on the ${SubAppPortEnum.Email}`)
+  Logger.log(`micro-email running on the ${SubAppPortEnum.Nats}`)
 }
 bootstrap()

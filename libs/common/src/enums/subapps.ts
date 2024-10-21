@@ -6,6 +6,7 @@ export enum SubAppEnum {
   Core = 'core',
   Logger = 'logger',
   Email = 'email',
+  Gateway = 'gateway',
 }
 
 /**
@@ -16,6 +17,7 @@ export enum SubAppRoutePrefixEnum {
   Core = '/core',
   Logger = '/logger',
   Email = '/email',
+  Gateway = '/gateway',
 }
 
 /**
@@ -27,6 +29,8 @@ export enum SubAppPortEnum {
   Logger = 3004,
   Email = 3006,
   Redis = 6379,
+  Gateway = 3000,
+  Nats = 4222,
 }
 
 /**

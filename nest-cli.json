@@ -64,6 +64,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/email/tsconfig.app.json"
       }
+    },
+    "nats": {
+      "type": "application",
+      "root": "apps/nats",
+      "entryFile": "main",
+      "sourceRoot": "apps/nats/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/nats/tsconfig.app.json"
+      }
     }
   }
 }

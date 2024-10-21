@@ -4,10 +4,10 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { isObject } from 'lodash'
-import { WLogger } from '../utils/logger'
 import { Result } from '../utils/result'
 
 @Catch()
@@ -21,7 +21,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR
 
-    WLogger.error(
+    Logger.error(
       `${request.method} ${request.url} reason -> ${
         isObject(exception) ? JSON.stringify(exception) : exception
       }`,
