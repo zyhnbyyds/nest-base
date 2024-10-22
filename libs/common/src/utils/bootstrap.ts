@@ -3,8 +3,12 @@ import secureSession, { SecureSessionPluginOptions } from '@fastify/secure-sessi
 import { AllExceptionsFilter } from '@libs/common/filters/all-exceptions.filter'
 import { DynamicModule, Logger, Type, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { WinstonModule } from 'nest-winston'
+import { natsConfig } from '../config'
+import { NatsConfig } from '../config/interface'
+import { SubAppPortEnum } from '../enums/subapps'
 import { winstonLoggerOptions } from './logger'
 
 export interface BootstrapOptions {
@@ -16,6 +20,11 @@ export interface BootstrapOptions {
   fastifyCsrf?: boolean
   module: Type<any> | DynamicModule | Promise<DynamicModule>
   allExceptionsFilter?: boolean
+}
+
+export interface MicroBootstrapOptions {
+  name: string
+  module: Type<any> | DynamicModule | Promise<DynamicModule>
 }
 
 /**
@@ -47,4 +56,22 @@ export async function bootstrap(options: BootstrapOptions) {
   })
 
   Logger.log(`App${options.name} running on the ${options.port}`)
+}
+
+export async function microBootstrap(options: MicroBootstrapOptions) {
+  const { server, user, pass } = natsConfig() as NatsConfig
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(options.module, {
+    transport: Transport.NATS,
+    options: {
+      servers: server,
+      timeout: 2000,
+      user,
+      pass,
+    },
+  })
+
+  app.useLogger(WinstonModule.createLogger(winstonLoggerOptions))
+
+  await app.listen()
+  Logger.log(`Micro-${options.name} running on the nats ${SubAppPortEnum.Nats}`)
 }

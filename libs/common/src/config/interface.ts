@@ -25,3 +25,9 @@ export interface DatabaseConfig {
   password: string
   database: string
 }
+
+export interface NatsConfig {
+  server: string
+  user: string
+  pass: string
+}
