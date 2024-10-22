@@ -7,6 +7,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { WinstonModule } from 'nest-winston'
 import { natsConfig } from '../config'
+import { NATS_TIMEOUT } from '../config/constant'
 import { NatsConfig } from '../config/interface'
 import { SubAppPortEnum } from '../enums/subapps'
 import { winstonLoggerOptions } from './logger'
@@ -64,7 +65,7 @@ export async function microBootstrap(options: MicroBootstrapOptions) {
     transport: Transport.NATS,
     options: {
       servers: server,
-      timeout: 2000,
+      timeout: NATS_TIMEOUT,
       user,
       pass,
     },

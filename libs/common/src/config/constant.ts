@@ -18,3 +18,5 @@ export const DEFAULT_SUCCESS_RESULT_CODE = 0
  * default error result code 默认失败返回码
  */
 export const DEFAULT_ERROR_RESULT_CODE = 1
+
+export const NATS_TIMEOUT = 10000
