@@ -1,7 +1,8 @@
 import { pid } from 'node:process'
 import { FastifyRequest } from 'fastify'
 import { addColors, format, type LoggerOptions, transports } from 'winston'
-import { SubAppPortEnum } from '../enums/subapps'
+import DailyRotateFile from 'winston-daily-rotate-file'
+import { ElasticsearchTransport } from 'winston-elasticsearch'
 import { YYYYMMDDHHmmss } from './moment'
 
 export interface LogExtraMsg {
@@ -68,12 +69,31 @@ export const winstonLoggerOptions: LoggerOptions = {
   handleRejections: true,
   transports: [
     new transports.Console(),
-    new transports.File({ filename: 'error.log', level: 'error', dirname: 'logs' }),
-    new transports.File({ filename: 'debug.log', level: 'debug', dirname: 'logs' }),
-    new transports.Http({
-      path: '/logger',
-      host: 'localhost',
-      port: SubAppPortEnum.Logger,
+    new DailyRotateFile({
+      filename: 'logs/error-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '20m',
+      level: 'error',
+      maxFiles: '14d',
+    }),
+    new DailyRotateFile({
+      filename: 'logs/debug-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '20m',
+      level: 'debug',
+      maxFiles: '14d',
+    }),
+    new ElasticsearchTransport({
+      level: 'info',
+      clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
+      indexPrefix: 'nest-logs-info',
+    }),
+    new ElasticsearchTransport({
+      level: 'error',
+      clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
+      indexPrefix: 'nest-logs-error',
     }),
   ],
 }
