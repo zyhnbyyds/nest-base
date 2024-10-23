@@ -6,10 +6,9 @@ import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { WinstonModule } from 'nest-winston'
-import { natsConfig } from '../config'
 import { NATS_TIMEOUT } from '../config/constant'
-import { NatsConfig } from '../config/interface'
 import { SubAppPortEnum } from '../enums/subapps'
+import { customValidateEnv } from './env'
 import { winstonLoggerOptions } from './logger'
 
 export interface BootstrapOptions {
@@ -60,7 +59,8 @@ export async function bootstrap(options: BootstrapOptions) {
 }
 
 export async function microBootstrap(options: MicroBootstrapOptions) {
-  const { server, user, pass } = natsConfig() as NatsConfig
+  const { NATS_SERVER_URL: server, NATS_AUTH_USER: user, NATS_AUTH_PASSWORD: pass } = customValidateEnv(process.env)
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(options.module, {
     transport: Transport.NATS,
     options: {

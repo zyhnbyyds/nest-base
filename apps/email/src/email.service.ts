@@ -13,10 +13,9 @@ export class EmailService {
   }
 
   async sendEmail(info: Mail.Options) {
-    const [_sendInfo, code] = combineEmailOptions(info)
+    const [sendInfo, code] = combineEmailOptions(info)
     await this.redis.set(`${MicroServiceNameEnum.EMAIL_SERVICE}:${info.to}`, code, 'PX', EMAIL_CODE_EXPIRE_TIME)
-    // TODO:本地测试，暂不用邮件
-    // await this.transporter.sendMail(sendInfo)
+    await this.transporter.sendMail(sendInfo)
     return true
   }
 }

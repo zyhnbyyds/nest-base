@@ -6,14 +6,14 @@ import { MicroServiceMessageEnum, MicroServiceNameEnum } from '@libs/common/enum
 import { SuccessMsg } from '@libs/common/enums/success'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
 import { MysqlService } from '@libs/common/services/prisma.service'
-import ms from '@libs/common/utils/ms'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { ClientProxy } from '@nestjs/microservices'
 import Redis from 'ioredis'
+import ms, { type StringValue } from 'ms'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
 import { lastValueFrom } from 'rxjs'
 import { EmailRegisterDto, EmailVerifyDto } from './dto/register.dto'
@@ -41,34 +41,40 @@ export class AuthService {
   }
 
   async loginUseEmail(body: EmailVerifyDto) {
-    const cacheVerifyCode = await this.redisApp.get(`${MicroServiceNameEnum.EMAIL_SERVICE}:${body.email}`)
-    if (!cacheVerifyCode || cacheVerifyCode !== body.code) {
-      return Result.fail(EmailErrorMsg.EmailVerifyCodeError)
+    try {
+      const cacheVerifyCode = await this.redisApp.get(`${MicroServiceNameEnum.EMAIL_SERVICE}:${body.email}`)
+      if (!cacheVerifyCode || cacheVerifyCode !== body.code) {
+        return Result.fail(EmailErrorMsg.EmailVerifyCodeError)
+      }
+
+      this.delEmailCode(body.email)
+      // if has registered return register info
+      let registeredUser = await this.mysqlService.registerUser.findUnique({ where: { email: body.email }, select: { userId: true, status: true, email: true } })
+
+      if (!registeredUser) {
+        registeredUser = await this.mysqlService.registerUser.create({ data: { email: body.email, userId: new Snowflake(1, 1).generateId(), status: RegisterUserStatus.NotAddUserInfo }, select: { userId: true, status: true, email: true } })
+      }
+
+      this.delEmailCode(body.email)
+      const token = await this.generateToken(body.email, registeredUser.userId)
+
+      if (registeredUser.status === RegisterUserStatus.NotAddUserInfo) {
+        await this.setToken(token, registeredUser.userId)
+        return Result.success({ verify: registeredUser, token })
+      }
+
+      else if (registeredUser.status === RegisterUserStatus.Success) {
+        const user = await this.mysqlService.user.findUnique({ where: { userId: registeredUser.userId }, select: { userId: true, email: true } })
+        await this.setToken(token, registeredUser.userId)
+        return Result.success({ verify: { ...user, status: 0 }, token })
+      }
+      else {
+        return Result.fail()
+      }
     }
 
-    this.delEmailCode(body.email)
-    // if has registered return register info
-    let registeredUser = await this.mysqlService.registerUser.findUnique({ where: { email: body.email }, select: { userId: true, status: true, email: true } })
-
-    if (!registeredUser) {
-      registeredUser = await this.mysqlService.registerUser.create({ data: { email: body.email, userId: new Snowflake(1, 1).generateId(), status: RegisterUserStatus.NotAddUserInfo }, select: { userId: true, status: true, email: true } })
-    }
-
-    this.delEmailCode(body.email)
-    const token = await this.generateToken(body.email, registeredUser.userId)
-
-    if (registeredUser.status === RegisterUserStatus.NotAddUserInfo) {
-      await this.setToken(token, registeredUser.userId)
-      return Result.success({ verify: registeredUser, token })
-    }
-
-    else if (registeredUser.status === RegisterUserStatus.Success) {
-      const user = await this.mysqlService.user.findUnique({ where: { userId: registeredUser.userId }, select: { userId: true, email: true } })
-      await this.setToken(token, registeredUser.userId)
-      return Result.success({ verify: { ...user, status: 0 }, token })
-    }
-    else {
-      return Result.fail()
+    catch (error) {
+      throw new InternalServerErrorException(error)
     }
   }
 
@@ -78,7 +84,7 @@ export class AuthService {
 
   setToken(token: string, userId: string) {
     const { expiresIn } = this.configService.get<AuthConfig>('jwt')
-    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', ms(expiresIn))
+    return this.redisApp.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', ms(expiresIn as StringValue))
   }
 
   generateToken(email: string, userId: string) {

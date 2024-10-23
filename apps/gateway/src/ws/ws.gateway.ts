@@ -1,6 +1,6 @@
 import { FactoryName } from '@libs/common/enums/factory'
 import { SubAppPortEnum } from '@libs/common/enums/subapps'
-import { MysqlService } from '@libs/common/services/prisma.service'
+import { MongoService } from '@libs/common/services/prisma.service'
 import { Inject } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
@@ -26,7 +26,7 @@ export class EventsGateway {
   private userId: string
 
   constructor(
-    private mysqlService: MysqlService,
+    private mongoService: MongoService,
     private jwtService: JwtService,
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
@@ -40,7 +40,7 @@ export class EventsGateway {
       this.socket = socket
       const { userId } = await this.jwtService.verifyAsync<{ userId: string, email: string }>(this.socket.handshake.auth.token)
       this.userId = userId
-      // this.MysqlService.imUser.update({ data: { status: 0 }, where: { userId } })
+      this.mongoService.imUser.update({ data: { status: 0 }, where: { userId, id: null } })
       this.redis.set(`socket:chat:${userId}`, socket.id)
     })
   }

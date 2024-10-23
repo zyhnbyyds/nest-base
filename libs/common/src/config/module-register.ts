@@ -3,7 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { ClientProviderOptions, Transport } from '@nestjs/microservices'
 import { LocalHost, MicroServiceNameEnum, SubAppPortEnum } from '../enums/subapps'
+import { customValidateEnv } from '../utils/env'
+import { NATS_TIMEOUT } from './constant'
 import { AuthConfig } from './interface'
+
+const { NATS_SERVER_URL: server, NATS_AUTH_USER: user, NATS_AUTH_PASSWORD: pass } = customValidateEnv(process.env)
 
 /**
  * 邮件注册模块
@@ -12,18 +16,10 @@ export const EmailModuleRegister: ClientProviderOptions = {
   name: MicroServiceNameEnum.EMAIL_SERVICE,
   transport: Transport.NATS,
   options: {
-    servers: 'nats://localhost:4222',
-  },
-}
-
-/**
- * 日志注册模块
- */
-export const LoggerModuleRegister: ClientProviderOptions = {
-  name: MicroServiceNameEnum.LOGGER_SERVICE,
-  transport: Transport.TCP,
-  options: {
-    port: SubAppPortEnum.Logger,
+    servers: server,
+    timeout: NATS_TIMEOUT,
+    user,
+    pass,
   },
 }
 
