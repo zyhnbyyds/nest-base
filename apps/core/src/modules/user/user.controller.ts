@@ -1,10 +1,8 @@
-import { MicroServiceNameEnum, MicroServicesEventEnum } from '@libs/common/enums/subapps'
+import { MicroServiceNameEnum } from '@libs/common/enums/subapps'
 import { FastifyRequestWithAuth } from '@libs/common/types/interface'
-import { transReqToLogRecord } from '@libs/common/utils/logger'
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { seconds, Throttle } from '@nestjs/throttler'
-import { FastifyRequest } from 'fastify'
 import { User } from 'prisma-mysql'
 import { CreateUserDto } from './dto/createUser.dto'
 import { UserService } from './user.service'
@@ -17,10 +15,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto, @Req() req: FastifyRequest) {
+  async create(@Body() createUserDto: CreateUserDto) {
     await this.client.connect()
-    this.client.emit(MicroServicesEventEnum.WRITE_LOG, transReqToLogRecord(req))
-
     return await this.userService.create(createUserDto)
   }
 

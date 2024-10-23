@@ -47,15 +47,6 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
-    "logger": {
-      "type": "application",
-      "root": "apps/logger",
-      "entryFile": "main",
-      "sourceRoot": "apps/logger/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/logger/tsconfig.app.json"
-      }
-    },
     "email": {
       "type": "application",
       "root": "apps/email",
