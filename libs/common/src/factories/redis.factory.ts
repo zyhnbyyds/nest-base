@@ -1,15 +1,14 @@
 import Redis from 'ioredis'
-import { redisConfig } from '../config'
-import { RedisConfig } from '../config/interface'
 import { FactoryName } from '../enums/factory'
+import { customValidateEnv } from '../utils/env'
 
 const RedisFactory = {
   provide: FactoryName.RedisFactory,
   useFactory: () => {
-    const { port, host } = redisConfig() as RedisConfig
+    const { REDIS_PORT, REDIS_HOST } = customValidateEnv(process.env)
     return new Redis({
-      port,
-      host,
+      port: REDIS_PORT,
+      host: REDIS_HOST,
       // TODO: 配置权限
     })
   },

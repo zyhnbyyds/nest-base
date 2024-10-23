@@ -1,4 +1,5 @@
 import { FactoryName } from '@libs/common/enums/factory'
+import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { MysqlService } from '@libs/common/services/prisma.service'
 import { Inject } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
@@ -7,7 +8,7 @@ import { instrument } from '@socket.io/admin-ui'
 import Redis from 'ioredis'
 import { Namespace, Server, Socket } from 'socket.io'
 
-@WebSocketGateway(3002, {
+@WebSocketGateway(SubAppPortEnum.GatewayEvent, {
   cors: {
     origin: ['https://admin.socket.io', 'http://localhost:3300'],
     credentials: true,

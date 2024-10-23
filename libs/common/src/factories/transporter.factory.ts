@@ -1,13 +1,12 @@
 import { Provider } from '@nestjs/common'
 import { createTransport } from 'nodemailer'
-import { emailConfig } from '../config'
-import { EmailConfig } from '../config/interface'
 import { FactoryName } from '../enums/factory'
+import { customValidateEnv } from '../utils/env'
 
 export const TransportFactory: Provider = {
   provide: FactoryName.TransportFactory,
   useFactory: () => {
-    const { host, port, user, password } = emailConfig() as EmailConfig
+    const { EMAIL_HOST: host, EMAIL_PORT: port, EMAIL_USER: user, EMAIL_PASSWORD: password } = customValidateEnv(process.env)
     return createTransport({
       host,
       port,

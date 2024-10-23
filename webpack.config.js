@@ -4,16 +4,6 @@ const swcDefaultConfig = require('@nestjs/cli/lib/compiler/defaults/swc-defaults
  * @type {import('webpack').Configuration}
  */
 module.exports = {
-  stats: {
-    all: false,
-    errors: true,
-    warnings: true,
-    timings: true,
-    assets: true,
-    builtAt: true,
-    modules: false,
-    colors: true,
-  },
   module: {
     rules: [
       {

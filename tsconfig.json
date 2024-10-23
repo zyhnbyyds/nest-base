@@ -20,6 +20,8 @@
         "libs/test/src/*"
       ]
     },
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["node"],
     "strict": true,
     "strictBindCallApply": false,
     "strictNullChecks": false,
@@ -32,5 +34,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": false,
     "skipLibCheck": true
-  }
+  },
+  "include": ["apps/**/*.ts", "libs/**/*.ts", "types/**/*.d.ts"]
 }

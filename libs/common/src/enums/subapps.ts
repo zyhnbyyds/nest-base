@@ -31,6 +31,7 @@ export enum SubAppPortEnum {
   Redis = 6379,
   Gateway = 3000,
   Nats = 4222,
+  GatewayEvent = 3100,
 }
 
 /**

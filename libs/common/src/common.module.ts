@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
 import RedisFactory from './factories/redis.factory'
 import { MongoService, MysqlService } from './services/prisma.service'
+import { customValidateEnv } from './utils/env'
 
 /**
  * Common module 通用模块
@@ -12,7 +13,7 @@ import { MongoService, MysqlService } from './services/prisma.service'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      cache: true,
+      validate: customValidateEnv,
       load: [redisConfig, emailConfig, databaseConfig, jwtConfig],
       envFilePath: ['.env', `.env.${process.env.NODE_ENV}`],
     }),
