@@ -1,3 +1,4 @@
+import compression from '@fastify/compress'
 import fastifyCsrf from '@fastify/csrf-protection'
 import secureSession, { SecureSessionPluginOptions } from '@fastify/secure-session'
 import { AllExceptionsFilter } from '@libs/common/filters/all-exceptions.filter'
@@ -6,7 +7,7 @@ import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { WinstonModule } from 'nest-winston'
-import { NATS_TIMEOUT } from '../config/constant'
+import { NATS_TIMEOUT } from '../constant'
 import { SubAppPortEnum } from '../enums/subapps'
 import { customValidateEnv } from './env'
 import { winstonLoggerOptions } from './logger'
@@ -20,6 +21,7 @@ export interface BootstrapOptions {
   fastifyCsrf?: boolean
   module: Type<any> | DynamicModule | Promise<DynamicModule>
   allExceptionsFilter?: boolean
+  compression?: boolean
 }
 
 export interface MicroBootstrapOptions {
@@ -48,6 +50,9 @@ export async function bootstrap(options: BootstrapOptions) {
 
   if (options.fastifyCsrf)
     await app.register(fastifyCsrf)
+
+  if (options.compression)
+    await app.register(compression)
 
   app.useLogger(WinstonModule.createLogger(winstonLoggerOptions))
 

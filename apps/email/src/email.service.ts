@@ -1,4 +1,4 @@
-import { EMAIL_CODE_EXPIRE_TIME } from '@libs/common/config/constant'
+import { EMAIL_CODE_EXPIRE_TIME } from '@libs/common/constant'
 import { FactoryName } from '@libs/common/enums/factory'
 import { MicroServiceNameEnum } from '@libs/common/enums/subapps'
 import { combineEmailOptions } from '@libs/common/utils/email'

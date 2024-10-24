@@ -1,3 +1,4 @@
+import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKET_PING_TIMEOUT } from '@libs/common/constant'
 import { FactoryName } from '@libs/common/enums/factory'
 import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { MongoService } from '@libs/common/services/prisma.service'
@@ -7,15 +8,16 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from
 import { instrument } from '@socket.io/admin-ui'
 import Redis from 'ioredis'
 import { Namespace, Server, Socket } from 'socket.io'
+import { ulid } from 'ulid'
 
 @WebSocketGateway(SubAppPortEnum.GatewayEvent, {
   cors: {
-    origin: ['https://admin.socket.io', 'http://localhost:3300'],
+    origin: SOCKET_ORIGIN_EXCLUDE,
     credentials: true,
   },
-  pingInterval: 2000,
-  pingTimeout: 3000,
-  namespace: 'im',
+  pingInterval: SOCKET_PING_INTERVAL,
+  pingTimeout: SOCKET_PING_TIMEOUT,
+  namespace: SOCKET_NAMESPACE_IM,
 })
 
 export class EventsGateway {
@@ -40,31 +42,29 @@ export class EventsGateway {
       this.socket = socket
       const { userId } = await this.jwtService.verifyAsync<{ userId: string, email: string }>(this.socket.handshake.auth.token)
       this.userId = userId
-      this.mongoService.imUser.update({ data: { status: 0 }, where: { userId, id: null } })
+      await this.mongoService.imUser.update({ data: { status: 0 }, where: { userId } })
       this.redis.set(`socket:chat:${userId}`, socket.id)
-    })
-  }
 
-  @SubscribeMessage('receive-message')
-  handleReceiveMessage(@MessageBody() data: { id: number, name: string, message: string }) {
-    this.server.emit('message', data.message)
+      socket.on('disconnect', async () => {
+        this.redis.del(`socket:chat:${userId}`)
+        await this.mongoService.imUser.update({ data: { status: 1 }, where: { userId } })
+      })
+    })
   }
 
   @SubscribeMessage('send-message')
   async handleSendMessage(@MessageBody() data: { toUser: string, content: string }) {
+    await this.mongoService.imMessage.create({
+      data: {
+        messageId: ulid(),
+        content: data.content,
+        fromUserId: this.userId,
+        toUserId: data.toUser,
+      },
+    })
     const socketId = await this.redis.get(`socket:chat:${data.toUser}`)
     if (socketId) {
       this.server.to(socketId).emit('receive-message', data.content)
     }
-  }
-
-  @SubscribeMessage('join')
-  handleJoin(@MessageBody() data: { id: number, name: string }) {
-    this.server.emit('join', data)
-  }
-
-  @SubscribeMessage('leave')
-  handleLeave(@MessageBody() data: { id: number, name: string }) {
-    this.server.emit('leave', data)
   }
 }

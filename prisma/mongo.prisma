@@ -10,7 +10,7 @@ datasource mongodb {
 
 model ImUser {
   id            String    @id @default(auto()) @map("_id") @mongodb.ObjectId
-  userId       String   @map("user_id")
+  userId       String   @map("user_id") @unique
   status       Int?     @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -20,7 +20,7 @@ model ImUser {
 
 model ImGroup {
   id            String    @id @default(auto()) @map("_id") @mongodb.ObjectId
-  groupId      String   @map("group_id")
+  groupId      String   @map("group_id") @unique
   status       Int?     @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -40,7 +40,7 @@ model ImGroupMember {
 
 model ImMessage {
   id           String   @id @default(auto()) @map("_id") @mongodb.ObjectId
-  messageId    String   @map("message_id")
+  messageId    String   @map("message_id") @unique
   fromUserId   String   @map("from_user_id")
   toUserId     String   @map("to_user_id")
   content      String   @map("content") @mongodb.String

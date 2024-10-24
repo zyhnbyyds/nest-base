@@ -1,4 +1,4 @@
-import { DEFAULT_ERROR_RESULT_CODE, DEFAULT_SUCCESS_RESULT_CODE, DEFAULT_SUCCESS_RESULT_MSG } from '../config/constant'
+import { DEFAULT_ERROR_RESULT_CODE, DEFAULT_SUCCESS_RESULT_CODE, DEFAULT_SUCCESS_RESULT_MSG } from '../constant'
 import { CommonErrorMsg } from '../enums/error'
 
 /**

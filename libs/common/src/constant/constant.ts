@@ -20,3 +20,17 @@ export const DEFAULT_SUCCESS_RESULT_CODE = 0
 export const DEFAULT_ERROR_RESULT_CODE = 1
 
 export const NATS_TIMEOUT = 10000
+
+// about socket.io
+export const SOCKET_TIMEOUT = 30000
+
+export const SOCKET_PING_INTERVAL = 2000
+
+export const SOCKET_PING_TIMEOUT = 5000
+
+export const SOCKET_NAMESPACE_IM = 'im'
+
+export const SOCKET_ORIGIN_EXCLUDE = [
+  'https://admin.socket.io',
+  'http://localhost:3300',
+]

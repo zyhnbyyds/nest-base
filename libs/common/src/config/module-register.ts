@@ -2,9 +2,9 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { ClientProviderOptions, Transport } from '@nestjs/microservices'
+import { NATS_TIMEOUT } from '../constant'
 import { LocalHost, MicroServiceNameEnum, SubAppPortEnum } from '../enums/subapps'
 import { customValidateEnv } from '../utils/env'
-import { NATS_TIMEOUT } from './constant'
 import { AuthConfig } from './interface'
 
 const { NATS_SERVER_URL: server, NATS_AUTH_USER: user, NATS_AUTH_PASSWORD: pass } = customValidateEnv(process.env)

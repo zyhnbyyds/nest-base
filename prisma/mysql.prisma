@@ -36,36 +36,3 @@ model RegisterUser {
   
   @@map("register_user")
 }
-
-model Log {
-  id           BigInt   @id @default(autoincrement())  // 主键，自动递增
-  logLevel     String   @db.VarChar(50)               // 日志级别：INFO, ERROR, WARN, DEBUG 等
-  message      String   @db.Text                      // 日志的具体信息或描述
-  context      Json?                                 // 上下文信息，JSON 格式存储额外数据（比如请求参数）
-  
-  serviceName  String   @db.VarChar(100)              // 服务名称，用于标识具体服务（比如 UserService、OrderService）
-  methodName   String   @db.VarChar(100)              // 方法名称，表示哪个方法产生了日志
-  requestId    String?  @db.VarChar(100)             // 请求 ID，用于跟踪整个请求过程
-  traceId      String?  @db.VarChar(100)             // 跟踪 ID（Trace ID），用于分布式追踪
-  spanId       String?  @db.VarChar(100)             // 跨度 ID（Span ID），用于跟踪每个微服务的调用链
-  parentSpanId String?  @db.VarChar(100)             // 父跨度 ID，用于形成完整的调用链
-  
-  statusCode   Int?                                  // 状态码，用于记录 HTTP 状态或业务逻辑的状态
-  errorStack   String?  @db.Text                     // 错误堆栈信息，如果发生错误，则记录堆栈信息
-  hostName     String?  @db.VarChar(255)             // 主机名，记录服务所在主机
-  ipAddress    String?  @db.VarChar(50)              // IP 地址，记录请求的来源 IP
-  userAgent    String?  @db.VarChar(255)             // 客户端 User-Agent 信息，通常用于记录客户端设备、浏览器类型等信息
-  requestPath  String?  @db.VarChar(255)             // 请求路径，用于记录具体的 API 路径或 URL
-  
-  executionTime Int?                                 // 执行时间，记录某个操作或请求的耗时（以毫秒为单位）
-  userId       BigInt?                               // 用户 ID，用于关联到具体用户（如果适用）
-  
-  createdAt    DateTime @default(now())              // 日志生成时间，自动记录
-  updatedAt    DateTime @updatedAt                   // 日志更新时间，记录最后修改时间
-
-  @@index([requestId])
-  @@index([traceId])
-  @@index([spanId])
-  @@index([parentSpanId])
-  @@map("log")
-}
