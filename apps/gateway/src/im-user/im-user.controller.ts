@@ -12,6 +12,11 @@ export class ImUserController {
     return this.imUserService.login(body.userId)
   }
 
+  @Post('/logout')
+  logout(@Body() body: LoginImDto) {
+    return this.imUserService.logout(body.userId)
+  }
+
   @HttpCode(HttpStatus.OK)
   @Post()
   create(@Body() createImUserDto: CreateImUserDto) {
