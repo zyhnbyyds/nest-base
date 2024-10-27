@@ -1,4 +1,4 @@
-import { IsEmpty, IsString } from 'class-validator'
+import { IsString } from 'class-validator'
 
 export class CreateImUserDto {
   @IsString()

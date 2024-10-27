@@ -22,6 +22,7 @@ export interface BootstrapOptions {
   module: Type<any> | DynamicModule | Promise<DynamicModule>
   allExceptionsFilter?: boolean
   compression?: boolean
+  globalValidate?: boolean
 }
 
 export interface MicroBootstrapOptions {
@@ -42,8 +43,9 @@ export async function bootstrap(options: BootstrapOptions) {
   if (options.prefix)
     app.setGlobalPrefix(options.prefix)
 
-  app
-    .useGlobalPipes(new ValidationPipe())
+  if (options.globalValidate) {
+    app.useGlobalPipes(new ValidationPipe())
+  }
 
   if (options.secureSession)
     await app.register(secureSession, options.secureSession)
@@ -63,6 +65,7 @@ export async function bootstrap(options: BootstrapOptions) {
   Logger.log(`App${options.name} running on the ${options.port}`)
 }
 
+// TODO: 添加通信降级成tcp
 export async function microBootstrap(options: MicroBootstrapOptions) {
   const { NATS_SERVER_URL: server, NATS_AUTH_USER: user, NATS_AUTH_PASSWORD: pass } = customValidateEnv(process.env)
 
