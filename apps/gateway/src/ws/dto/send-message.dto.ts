@@ -15,8 +15,4 @@ export class SendMessageDto {
 
   @IsEnum(ImSendMessageTypeEnum)
   messageType?: ImSendMessageTypeEnum = ImSendMessageTypeEnum.TEXT
-
-  @IsString()
-  @IsNotEmpty()
-  test: string
 }

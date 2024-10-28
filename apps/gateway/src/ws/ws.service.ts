@@ -3,12 +3,16 @@ import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { MongoService } from '@libs/common/services/prisma.service'
+import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import Redis from 'ioredis'
+import { omit } from 'lodash'
 import { Server, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { ImUserService } from '../im-user/im-user.service'
+import { CreateRoomDto } from './dto/create-room.dto'
+import { SendMessageDto } from './dto/send-message.dto'
 
 @Injectable()
 export class WsService {
@@ -30,7 +34,7 @@ export class WsService {
     this.server = server
   }
 
-  async sendMessage(data: { toUser: string, content: string }) {
+  async sendMessage(data: SendMessageDto) {
     if (!this.userId) {
       // TODO: perf error handle
       this.server.emit('error', 'login-first')
@@ -48,7 +52,7 @@ export class WsService {
       },
     })
 
-    const socketId = await this.redis.get(`${RedisCacheKey.SocketId}:${data.toUser}`)
+    const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${data.toUser}`)
 
     if (socketId) {
       this.server.to(socketId).emit('receive-message', data.content)
@@ -110,9 +114,24 @@ export class WsService {
 
     socket.on(SOCKET_EVENT.DISCONNECT, async () => {
       if (this.userId) {
-        this.redis.del(`${RedisCacheKey.SocketId}${this.userId}`)
+        // this.redis.del(`${RedisCacheKey.SocketId}${this.userId}`)
         await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId: this.userId } })
       }
     })
+  }
+
+  async createRoom(body: CreateRoomDto) {
+    const res = await this.mongoService.imGroup.create({
+      data: {
+        ...body,
+        createdBy: this.userId,
+        groupId: new Snowflake(1, 1).generateId(),
+        masterId: this.userId,
+      },
+    })
+
+    const joinInfo = await this.socket.join(res.groupId)
+    console.log(joinInfo, this.socket.rooms)
+    return res
   }
 }

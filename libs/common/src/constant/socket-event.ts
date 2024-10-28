@@ -23,4 +23,5 @@ export const SOCKET_EVENT = {
   RECONNECT_MANUAL: 'reconnect_manual',
   RECONNECT_ABORT: 'reconnect_abort',
   HEARTBEAT: 'heartbeat',
+  CREATE_ROOM: 'createRoom',
 }

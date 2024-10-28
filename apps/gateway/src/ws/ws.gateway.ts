@@ -4,7 +4,9 @@ import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { instrument } from '@socket.io/admin-ui'
+import { isBoolean } from 'lodash'
 import { Namespace, Server, Socket } from 'socket.io'
+import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 import { WsService } from './ws.service'
 
@@ -24,6 +26,8 @@ export class EventsGateway {
 
   private socket: Socket
 
+  private userId: string
+
   constructor(
     private readonly wsService: WsService,
   ) {
@@ -41,7 +45,7 @@ export class EventsGateway {
   async handleSendMessage(@MessageBody() data: SendMessageDto): Promise<Record<string, NestedValidationErrors> | undefined> {
     const [result, errors] = await validateWsBody(SendMessageDto, data)
     if (errors) {
-      this.socket.emit(SOCKET_EVENT.ERROR, result)
+      this.socket.to(this.userId).emit(SOCKET_EVENT.ERROR, result)
       return result
     }
     await this.wsService.sendMessage(data)
@@ -52,6 +56,20 @@ export class EventsGateway {
     await this.wsService.readMessage(data)
   }
 
+  @SubscribeMessage(SOCKET_EVENT.CREATE_ROOM)
+  async handleCreateRoom(@MessageBody() data: CreateRoomDto) {
+    const [result, errors] = await validateWsBody(CreateRoomDto, data)
+
+    if (errors) {
+      this.socket.emit(SOCKET_EVENT.ERROR, result)
+      return result
+    }
+
+    const group = await this.wsService.createRoom(data)
+
+    return group
+  }
+
   @SubscribeMessage(SOCKET_EVENT.JOIN_ROOM)
   async handleJoinGroup(@MessageBody() data: { groupId: string }) {
     const res = await this.socket.join(data.groupId)
@@ -60,6 +78,7 @@ export class EventsGateway {
 
   @SubscribeMessage(SOCKET_EVENT.LOGIN)
   async handleLogin() {
-    await this.wsService.login(this.server)
+    const userInfo = await this.wsService.login(this.server)
+    this.userId = isBoolean(userInfo) ? undefined : userInfo.userId
   }
 }
