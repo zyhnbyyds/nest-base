@@ -52,3 +52,15 @@ model ImMessage {
 
   @@map("im_message")
 }
+
+model ImUserFriend {
+  id         String   @id @default(auto()) @map("_id") @mongodb.ObjectId
+  userId     String   @map("user_id")
+  friendId   String   @map("friend_id")
+  remark     String?  @map("remark")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isDelete   Boolean? @default(false)
+
+  @@map("im_user_friend")
+}
