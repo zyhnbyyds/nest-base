@@ -26,7 +26,8 @@
     "run:gateway": "cross-env NODE_ENV=dev npm-run-all --parallel dev:gateway",
     "run:micro": "cross-env NODE_ENV=dev npm-run-all -p dev:email",
     "run:all": "cross-env NODE_ENV=dev npm-run-all -p run:micro dev:core dev:auth dev:gateway",
-    "micro:email": "nest start email --watch"
+    "micro:email": "nest start email --watch",
+    "publish": "changeset publish"
   },
   "dependencies": {
     "@fastify/compress": "^8.0.1",
@@ -75,6 +76,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.8.0",
+    "@changesets/cli": "^2.27.9",
     "@compodoc/compodoc": "^1.1.26",
     "@nestjs/cli": "^10.4.5",
     "@nestjs/config": "^3.2.3",

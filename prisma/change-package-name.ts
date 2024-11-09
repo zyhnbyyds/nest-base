@@ -10,11 +10,11 @@ async function changeClientName(name: string) {
 
   const oldName = packageJson.name
 
-  packageJson.name = `prisma-${name}`
+  packageJson.name = `@zgyh/prisma-${name}`
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf8')
 
-  console.log(`✨ Changed ${oldName} to prisma-${name} in ${packageJsonPath}`)
+  console.log(`✨ Changed ${oldName} to @zgyh/prisma-${name} in ${packageJsonPath}`)
 }
 
 ['mysql', 'mongo'].forEach(changeClientName)
