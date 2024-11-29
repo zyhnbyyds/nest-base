@@ -50,7 +50,7 @@
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/throttler": "^6.2.1",
     "@nestjs/websockets": "^10.4.5",
-    "@prisma/client": "^5.21.1",
+    "@prisma/client": "^6.0.0",
     "@socket.io/admin-ui": "^0.5.1",
     "bullmq": "^5.21.2",
     "class-transformer": "^0.5.1",
