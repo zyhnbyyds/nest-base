@@ -27,6 +27,10 @@ export class Result {
     return this.getResult(null, message, DEFAULT_SUCCESS_RESULT_CODE)
   }
 
+  static list<T>(data: T[], total: number, message: string = DEFAULT_SUCCESS_RESULT_MSG) {
+    return this.getResult({ data, total }, message, DEFAULT_SUCCESS_RESULT_CODE)
+  }
+
   static fail(message: any = CommonErrorMsg.UnknownError, code: number = DEFAULT_ERROR_RESULT_CODE) {
     return this.getResult(null, message, code)
   }

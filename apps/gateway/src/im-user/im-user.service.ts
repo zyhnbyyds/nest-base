@@ -2,6 +2,7 @@ import { FactoryName } from '@libs/common/enums/factory'
 import { ImUserStatusEnum } from '@libs/common/enums/im'
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { MongoService } from '@libs/common/services/prisma.service'
+import { transformPage } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Inject, Injectable } from '@nestjs/common'
 import Redis from 'ioredis'
@@ -40,8 +41,9 @@ export class ImUserService {
 
   async findAll(query: GetImUserListDto) {
     const { userName } = query
-    const list = await this.prisma.imUser.findMany({ where: { userName } })
-    return Result.success(list)
+    const list = await this.prisma.imUser.findMany({ where: { userName }, ...transformPage(query) })
+    const total = await this.prisma.imUser.count({ where: { userName } })
+    return Result.list(list, total)
   }
 
   async findOne(userId: string) {

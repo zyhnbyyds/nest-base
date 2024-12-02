@@ -2,11 +2,14 @@ import { UserErrorMsg } from '@libs/common/enums/error'
 import { RegisterUserStatus } from '@libs/common/enums/user/status'
 import { MysqlService } from '@libs/common/services/prisma.service'
 import { YYYYMMDDHHmmss } from '@libs/common/utils/moment'
+import { transformPage } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable } from '@nestjs/common'
 import { User } from '@zgyh/prisma-mysql'
+import { omit } from 'lodash'
 import { CreateUserDto } from './dto/createUser.dto'
+import { GetUserListDto } from './dto/get-user-list-dto'
 
 @Injectable()
 export class UserService {
@@ -46,9 +49,11 @@ export class UserService {
     return resCreateInfo
   }
 
-  async findAll() {
-    const userList = await this.prisma.user.findMany()
-    return Result.success(userList)
+  async findAll(query: GetUserListDto) {
+    const queryExcludePage = omit(query, ['current', 'size'])
+    const userList = await this.prisma.user.findMany({ where: { ...queryExcludePage }, ...transformPage(query) })
+    const total = await this.prisma.user.count({ where: { ...queryExcludePage } })
+    return Result.list(userList, total)
   }
 
   async findOne(userId: string) {

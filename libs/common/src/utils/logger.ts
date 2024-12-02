@@ -30,7 +30,7 @@ export const winstonLoggerOptions: LoggerOptions = {
     splat(),
     prettyPrint(),
     printf(({ level, message, timestamp, label }) => {
-      return `[${label}] ${pid}  - ${YYYYMMDDHHmmss(timestamp)}     ${level} ${typeof message === 'object' ? JSON.stringify(message) : message}`
+      return `[${label}] ${pid}  - ${YYYYMMDDHHmmss(timestamp as string)}     ${level} ${typeof message === 'object' ? JSON.stringify(message) : message}`
     }),
   ),
 
