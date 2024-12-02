@@ -74,6 +74,12 @@ importers:
       '@socket.io/admin-ui':
         specifier: ^0.5.1
         version: 0.5.1(socket.io@4.8.0)
+      '@zgyh/prisma-mongo':
+        specifier: workspace:*
+        version: link:packages/mongo
+      '@zgyh/prisma-mysql':
+        specifier: workspace:*
+        version: link:packages/mysql
       bullmq:
         specifier: ^5.21.2
         version: 5.21.2
@@ -110,12 +116,6 @@ importers:
       openapi3-ts:
         specifier: ^4.4.0
         version: 4.4.0
-      prisma-mongo:
-        specifier: workspace:*
-        version: link:packages/mongo
-      prisma-mysql:
-        specifier: workspace:*
-        version: link:packages/mysql
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2

@@ -6,6 +6,7 @@ import { Result } from '@libs/common/utils/result'
 import { Inject, Injectable } from '@nestjs/common'
 import Redis from 'ioredis'
 import { CreateImUserDto } from './dto/create-im-user.dto'
+import { GetImUserListDto } from './dto/get-im-user.dto'
 
 @Injectable()
 export class ImUserService {
@@ -32,12 +33,15 @@ export class ImUserService {
   }
 
   async create(createImUserDto: CreateImUserDto) {
-    const imUser = await this.prisma.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE } })
+    const userName = (await this.prisma.imUser.findUnique({ where: { userId: createImUserDto.userId } })).userName
+    const imUser = await this.prisma.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName } })
     return Result.success(imUser)
   }
 
-  findAll() {
-    return `This action returns all imUser`
+  async findAll(query: GetImUserListDto) {
+    const { userName } = query
+    const list = await this.prisma.imUser.findMany({ where: { userName } })
+    return Result.success(list)
   }
 
   async findOne(userId: string) {

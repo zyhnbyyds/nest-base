@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common'
 import { CreateImUserDto, LoginImDto } from './dto/create-im-user.dto'
+import { GetImUserListDto } from './dto/get-im-user.dto'
 import { ImUserService } from './im-user.service'
 
 @Controller('im-user')
@@ -24,8 +25,8 @@ export class ImUserController {
   }
 
   @Get()
-  findAll() {
-    return this.imUserService.findAll()
+  findAll(@Query() query: GetImUserListDto) {
+    return this.imUserService.findAll(query)
   }
 
   @Get(':id')

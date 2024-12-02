@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common'
-import { PrismaClient as ClientMongo } from 'prisma-mongo'
-import { PrismaClient as ClientMysql } from 'prisma-mysql'
+import { PrismaClient as ClientMongo } from '@zgyh/prisma-mongo'
+import { PrismaClient as ClientMysql } from '@zgyh/prisma-mysql'
 
 @Injectable()
 export class MysqlService extends ClientMysql implements OnModuleInit {

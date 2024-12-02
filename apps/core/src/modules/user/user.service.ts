@@ -5,7 +5,7 @@ import { YYYYMMDDHHmmss } from '@libs/common/utils/moment'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable } from '@nestjs/common'
-import { User } from 'prisma-mysql'
+import { User } from '@zgyh/prisma-mysql'
 import { CreateUserDto } from './dto/createUser.dto'
 
 @Injectable()

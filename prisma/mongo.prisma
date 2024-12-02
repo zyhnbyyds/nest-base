@@ -13,6 +13,7 @@ model ImUser {
   status       Int?      @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  userName     String    @map("user_name")
   isDelete     Boolean?  @default(false)
   ImGroupIds   String[]  @map("group_ids")
   ImGroups     ImGroup[] @relation(fields: [ImGroupIds], references: [groupId])
