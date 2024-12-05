@@ -1,14 +1,24 @@
 import { Transform } from 'class-transformer'
-import { IsInt, Min } from 'class-validator'
+import { IsNumber, IsOptional, Min } from 'class-validator'
 
 export class PageDto {
-  @IsInt()
+  @IsNumber()
   @Min(1)
-  @Transform(({ value }) => Number.parseInt(value, 10))
-  current = 1
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value)
+      return Number(value)
+    return 1
+  })
+  current: number
 
-  @IsInt()
-  @Min(1)
-  @Transform(({ value }) => Number.parseInt(value, 10))
-  size = 10
+  @Min(10)
+  @IsNumber()
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value)
+      return Number(value)
+    return 12
+  })
+  size: number
 }

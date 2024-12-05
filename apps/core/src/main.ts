@@ -9,6 +9,7 @@ bootstrap({
   port: SubAppPortEnum.Core,
   allExceptionsFilter: true,
   logger: true,
+  globalValidate: true,
   prefix: SubAppRoutePrefixEnum.Core,
   fastifyCsrf: true,
   secureSession: {

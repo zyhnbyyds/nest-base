@@ -44,7 +44,7 @@ export async function bootstrap(options: BootstrapOptions) {
     app.setGlobalPrefix(options.prefix)
 
   if (options.globalValidate) {
-    app.useGlobalPipes(new ValidationPipe())
+    app.useGlobalPipes(new ValidationPipe({ stopAtFirstError: true }))
   }
 
   if (options.secureSession)

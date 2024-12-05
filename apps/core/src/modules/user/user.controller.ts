@@ -1,6 +1,5 @@
 import { FastifyRequestWithAuth } from '@libs/common/types/interface'
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, Req } from '@nestjs/common'
-import { seconds, Throttle } from '@nestjs/throttler'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common'
 import { User } from '@zgyh/prisma-mysql'
 import { CreateUserDto } from './dto/createUser.dto'
 import { GetUserListDto } from './dto/get-user-list-dto'
@@ -15,7 +14,6 @@ export class UserController {
     return await this.userService.create(createUserDto)
   }
 
-  @Throttle({ default: { ttl: seconds(30), limit: 1 } })
   @Get()
   findAll(@Query() query: GetUserListDto) {
     return this.userService.findAll(query)

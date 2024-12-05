@@ -5,8 +5,8 @@ import { PageDto } from '../dtos/page.dto'
  * @param page page info
  * @returns skip and take
  */
-export function transformPage(page: PageDto) {
-  const { current, size } = page
+export function transformPageToOrmQry(page: PageDto) {
+  const { current = 1, size = 10 } = page
   const skip = (current - 1) * size
   const take = size
   return {
