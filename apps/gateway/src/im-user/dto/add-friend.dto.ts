@@ -4,6 +4,6 @@ export class AddFriendDto {
   @IsString()
   friendId: string
 
-  @IsString()
-  userId: string
+  @Length(1, 100)
+  remark: string
 }

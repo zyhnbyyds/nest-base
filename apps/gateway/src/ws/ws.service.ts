@@ -3,6 +3,7 @@ import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { MongoService } from '@libs/common/services/prisma.service'
+import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
@@ -12,6 +13,11 @@ import { ulid } from 'ulid'
 import { ImUserService } from '../im-user/im-user.service'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
+
+interface UserVerify {
+  userId: string
+  email: string
+}
 
 @Injectable()
 export class WsService {
@@ -40,24 +46,9 @@ export class WsService {
       return false
     }
 
-    // Mark: 如果不用await, 这条会不执行
-    await this.mongoService.imMessage.create({
-      data: {
-        messageId: ulid(),
-        content: data.content,
-        fromUserId: this.userId,
-        toUserId: data.toUser,
-        status: ImMessageStatusEnum.UNREAD,
-      },
-    })
-
     const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${data.toUser}`)
 
     if (socketId) {
-      this.server.to(socketId).emit('receive-message', data.content)
-    }
-    else {
-      // TODO: add cache
       await this.mongoService.imMessage.create({
         data: {
           messageId: ulid(),
@@ -67,6 +58,19 @@ export class WsService {
           status: ImMessageStatusEnum.UNREAD,
         },
       })
+      this.server.to(socketId).emit('receiveMessage', { content: data.content, fromUser: this.userId, toUser: data.toUser, messageType: data.messageType })
+    }
+    else {
+      await this.mongoService.imMessage.create({
+        data: {
+          messageId: ulid(),
+          content: data.content,
+          fromUserId: this.userId,
+          toUserId: data.toUser,
+          status: ImMessageStatusEnum.UNREAD,
+        },
+      })
+      this.server.to(socketId).emit('receiveMessage', data.content)
     }
   }
 
@@ -84,26 +88,35 @@ export class WsService {
   }
 
   async login(server: Server) {
-    const res = await this.jwtService.verifyAsync<{ userId: string, email: string }>(this.socket.handshake.auth.token)
-
-    if (!res.userId) {
-      this.socket.emit('error', 'login-error')
-      return false
+    let res: UserVerify | null
+    try {
+      res = await this.jwtService.verifyAsync<UserVerify>(this.socket.handshake.auth.token)
+    }
+    catch (error) {
+      this.socket.emit('error', error)
+      return Result.fail(error, 403)
     }
 
-    const { userId } = res
+    try {
+      if (!res || !res.userId) {
+        this.socket.emit('error', 'login-error')
+        return Result.fail('login-error')
+      }
 
-    this.userId = userId
+      const { userId } = res
+      this.userId = userId
 
-    this.init(userId, server)
+      const { data } = await this.imUserService.login(userId)
+      const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
+      await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, this.socket.id)
+      this.init(userId, server)
 
-    const { data } = await this.imUserService.login(userId)
-
-    const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
-
-    await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, this.socket.id)
-
-    return updateInfo
+      return Result.success(updateInfo)
+    }
+    catch (error) {
+      this.socket.emit('error', error)
+      return Result.fail(error)
+    }
   }
 
   afterSeverConnection(socket: Socket) {
@@ -113,8 +126,13 @@ export class WsService {
 
     socket.on(SOCKET_EVENT.DISCONNECT, async () => {
       if (this.userId) {
-        // this.redis.del(`${RedisCacheKey.SocketId}${this.userId}`)
-        await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId: this.userId } })
+        const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId: this.userId } })
+        if (!imUserInfo) {
+          await this.imUserService.create({ userId: this.userId })
+        }
+        else {
+          await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId: this.userId } })
+        }
       }
     })
   }
@@ -129,8 +147,8 @@ export class WsService {
       },
     })
 
-    const joinInfo = await this.socket.join(res.groupId)
-    console.log(joinInfo, this.socket.rooms)
+    // const joinInfo = await this.socket.join(res.groupId)
+    // console.log(joinInfo, this.socket.rooms)
     return res
   }
 }

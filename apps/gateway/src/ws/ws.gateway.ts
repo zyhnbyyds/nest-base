@@ -2,7 +2,7 @@ import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKE
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
 import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { instrument } from '@socket.io/admin-ui'
 import { isBoolean } from 'lodash'
 import { Namespace, Server, Socket } from 'socket.io'
@@ -24,8 +24,6 @@ export class EventsGateway {
   @WebSocketServer()
   server: Server
 
-  private socket: Socket
-
   private userId: string
 
   constructor(
@@ -36,16 +34,15 @@ export class EventsGateway {
   afterInit(namespace: Namespace) {
     instrument(namespace.server, { auth: false, mode: 'production' })
     this.server.on(SOCKET_EVENT.CONNECTION, async (socket) => {
-      this.socket = socket
       this.wsService.afterSeverConnection(socket)
     })
   }
 
   @SubscribeMessage(SOCKET_EVENT.SEND_MESSAGE)
-  async handleSendMessage(@MessageBody() data: SendMessageDto): Promise<Record<string, NestedValidationErrors> | undefined> {
+  async handleSendMessage(@MessageBody() data: SendMessageDto, @ConnectedSocket() socket: Socket): Promise<Record<string, NestedValidationErrors> | undefined> {
     const [result, errors] = await validateWsBody(SendMessageDto, data)
     if (errors) {
-      this.socket.to(this.userId).emit(SOCKET_EVENT.ERROR, result)
+      socket.emit(SOCKET_EVENT.ERROR, result)
       return result
     }
     await this.wsService.sendMessage(data)
@@ -57,11 +54,11 @@ export class EventsGateway {
   }
 
   @SubscribeMessage(SOCKET_EVENT.CREATE_ROOM)
-  async handleCreateRoom(@MessageBody() data: CreateRoomDto) {
+  async handleCreateRoom(@MessageBody() data: CreateRoomDto, @ConnectedSocket() socket: Socket) {
     const [result, errors] = await validateWsBody(CreateRoomDto, data)
 
     if (errors) {
-      this.socket.emit(SOCKET_EVENT.ERROR, result)
+      socket.emit(SOCKET_EVENT.ERROR, result)
       return result
     }
 
@@ -71,14 +68,17 @@ export class EventsGateway {
   }
 
   @SubscribeMessage(SOCKET_EVENT.JOIN_ROOM)
-  async handleJoinGroup(@MessageBody() data: { groupId: string }) {
-    const res = await this.socket.join(data.groupId)
+  async handleJoinGroup(@MessageBody() data: { groupId: string }, @ConnectedSocket() socket: Socket) {
+    const res = await socket.join(data.groupId)
     return res
   }
 
   @SubscribeMessage(SOCKET_EVENT.LOGIN)
   async handleLogin() {
-    const userInfo = await this.wsService.login(this.server)
-    this.userId = isBoolean(userInfo) ? undefined : userInfo.userId
+    const res = await this.wsService.login(this.server)
+    if (res.data) {
+      this.userId = res.data.userId
+    }
+    return res
   }
 }

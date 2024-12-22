@@ -32,6 +32,6 @@ export class Result {
   }
 
   static fail(message: any = CommonErrorMsg.UnknownError, code: number = DEFAULT_ERROR_RESULT_CODE) {
-    return this.getResult(null, message, code)
+    return this.getResult<null>(null, message, code)
   }
 }

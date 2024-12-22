@@ -25,6 +25,7 @@ model User {
   isDelete      Boolean?  @default(false) @map("is_delete")
   email         String    @unique @map("email") @db.VarChar(20)
   password      String    @map("password") @db.VarChar(60)
+  ip            String?   @map("ip")
   @@map("user")
 }
 

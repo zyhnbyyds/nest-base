@@ -38,6 +38,7 @@ export class AuthJwtGuard implements CanActivate {
           secret,
         },
       )
+
       const cacheToken = await this.redis.get(`${RedisCacheKey.AuthToken}${payload.userId}`)
       if (cacheToken !== token || !cacheToken) {
         throw new UnauthorizedException()

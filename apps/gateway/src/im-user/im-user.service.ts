@@ -34,16 +34,19 @@ export class ImUserService {
   }
 
   async create(createImUserDto: CreateImUserDto) {
-    const userName = (await this.prisma.imUser.findUnique({ where: { userId: createImUserDto.userId } })).userName
-    const imUser = await this.prisma.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName } })
+    const imUser = await this.prisma.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName: '' } })
     return Result.success(imUser)
   }
 
   async findAll(query: GetImUserListDto) {
-    const { userName } = query
-    const list = await this.prisma.imUser.findMany({ where: { userName }, ...transformPageToOrmQry(query) })
-    const total = await this.prisma.imUser.count({ where: { userName } })
-    return Result.list(list, total)
+    try {
+      const list = await this.prisma.imUser.findMany({ ...transformPageToOrmQry(query) })
+      const total = await this.prisma.imUser.count()
+      return Result.list(list, total)
+    }
+    catch (error) {
+      return Result.fail(error)
+    }
   }
 
   async findOne(userId: string) {

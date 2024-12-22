@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
+import { FastifyRequestWithAuth } from '@libs/common/types/interface'
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req } from '@nestjs/common'
 import { AddFriendDto } from './dto/add-friend.dto'
 import { ImUserFriendService } from './im-user-friend.service'
 
@@ -11,10 +12,11 @@ export class ImUserFriendController {
     return this.imUserFriendService.friendList()
   }
 
-  @Post()
-  friendAdd(@Body() body: AddFriendDto) {
-    const { userId, friendId } = body
-    return this.imUserFriendService.friendAdd(userId, friendId)
+  @Post('/add')
+  @HttpCode(200)
+  friendAdd(@Body() body: AddFriendDto, @Req() req: FastifyRequestWithAuth) {
+    const { friendId } = body
+    return this.imUserFriendService.friendAdd(req.verify.userId, friendId)
   }
 
   @Delete(':id')
