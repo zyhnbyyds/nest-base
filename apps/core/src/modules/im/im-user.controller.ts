@@ -3,7 +3,7 @@ import { CreateImUserDto, LoginImDto } from './dto/create-im-user.dto'
 import { GetImUserListDto } from './dto/get-im-user.dto'
 import { ImUserService } from './im-user.service'
 
-@Controller('im-user')
+@Controller('/im/user')
 export class ImUserController {
   constructor(private readonly imUserService: ImUserService) {}
 

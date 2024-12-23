@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req } from
 import { AddFriendDto } from './dto/add-friend.dto'
 import { ImUserFriendService } from './im-friend.service'
 
-@Controller('/im/user/friend')
+@Controller('/im/friend')
 export class ImUserFriendController {
   constructor(private imUserFriendService: ImUserFriendService) {}
 

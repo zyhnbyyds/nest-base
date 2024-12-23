@@ -3,7 +3,7 @@ import { JwtModuleImport } from '@libs/common/config/module-register'
 import { TasksService } from '@libs/common/services/task.service'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
-import { ImModule } from './modules/im/im-user.module'
+import { ImModule } from './modules/im/im.module'
 import { UserModule } from './modules/user/user.module'
 
 @Module({

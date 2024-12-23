@@ -16,7 +16,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }`,
     )
     response
-      .status(status)
+      .status(status <= 500 ? 200 : status)
       .send(Result.fail(exception, status))
   }
 }

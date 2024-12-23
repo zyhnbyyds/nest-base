@@ -26,6 +26,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         isObject(exception) ? JSON.stringify(exception) : exception
       }`,
     )
-    response.status(status).send(Result.fail(exception, status))
+    response.status(status <= 500 ? 200 : status).send(Result.fail(exception, status))
   }
 }
