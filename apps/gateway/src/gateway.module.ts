@@ -1,10 +1,8 @@
-import { CommonModule } from '@libs/common'
 import { Module } from '@nestjs/common'
-import { ImUserModule } from './im-user/im-user.module'
-import { WsModule } from './ws/ws.module'
+import { WsModule } from './im/ws.module'
 
 @Module({
-  imports: [WsModule, ImUserModule, CommonModule],
+  imports: [WsModule],
   controllers: [],
   providers: [],
 })

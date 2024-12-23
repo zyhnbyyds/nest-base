@@ -10,7 +10,6 @@ import { JwtService } from '@nestjs/jwt'
 import Redis from 'ioredis'
 import { Server, Socket } from 'socket.io'
 import { ulid } from 'ulid'
-import { ImUserService } from '../im-user/im-user.service'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 
@@ -30,7 +29,6 @@ export class WsService {
 
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
-    private imUserService: ImUserService,
   ) {
   }
 
@@ -104,9 +102,14 @@ export class WsService {
       }
 
       const { userId } = res
+
       this.userId = userId
 
-      const { data } = await this.imUserService.login(userId)
+      let data = await this.mongoService.imUser.findUnique({ where: { userId } })
+      if (!data) {
+        data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: '' } })
+      }
+
       const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
       await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, this.socket.id)
       this.init(userId, server)
@@ -128,7 +131,7 @@ export class WsService {
       if (this.userId) {
         const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId: this.userId } })
         if (!imUserInfo) {
-          await this.imUserService.create({ userId: this.userId })
+          await this.mongoService.imUser.create({ data: { ...imUserInfo, status: ImUserStatusEnum.OFFLINE } })
         }
         else {
           await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId: this.userId } })

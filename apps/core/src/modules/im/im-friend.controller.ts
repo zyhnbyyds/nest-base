@@ -1,7 +1,7 @@
 import { FastifyRequestWithAuth } from '@libs/common/types/interface'
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req } from '@nestjs/common'
 import { AddFriendDto } from './dto/add-friend.dto'
-import { ImUserFriendService } from './im-user-friend.service'
+import { ImUserFriendService } from './im-friend.service'
 
 @Controller('/im/user/friend')
 export class ImUserFriendController {
