@@ -23,8 +23,6 @@ export class EventsGateway {
   @WebSocketServer()
   server: Server
 
-  private userId: string
-
   constructor(
     private readonly wsService: WsService,
   ) {
@@ -32,8 +30,9 @@ export class EventsGateway {
 
   afterInit(namespace: Namespace) {
     instrument(namespace.server, { auth: false, mode: 'production' })
-    this.server.on(SOCKET_EVENT.CONNECTION, async (socket) => {
-      this.wsService.afterSeverConnection(socket)
+
+    namespace.on(SOCKET_EVENT.CONNECTION, async (socket: Socket) => {
+      this.wsService.afterSeverConnection(socket, namespace)
     })
   }
 
@@ -44,12 +43,12 @@ export class EventsGateway {
       socket.emit(SOCKET_EVENT.ERROR, result)
       return result
     }
-    await this.wsService.sendMessage(data)
+    await this.wsService.sendMessage(socket, data)
   }
 
   @SubscribeMessage(SOCKET_EVENT.READ_MESSAGE)
-  async handleReadMessage(@MessageBody() data: { toUser: string }) {
-    await this.wsService.readMessage(data)
+  async handleReadMessage(@MessageBody() data: { toUser: string }, @ConnectedSocket() socket: Socket) {
+    await this.wsService.readMessage(socket, data)
   }
 
   @SubscribeMessage(SOCKET_EVENT.CREATE_ROOM)
@@ -61,7 +60,7 @@ export class EventsGateway {
       return result
     }
 
-    const group = await this.wsService.createRoom(data)
+    const group = await this.wsService.createRoom(socket, data)
 
     return group
   }
@@ -73,11 +72,8 @@ export class EventsGateway {
   }
 
   @SubscribeMessage(SOCKET_EVENT.LOGIN)
-  async handleLogin() {
-    const res = await this.wsService.login(this.server)
-    if (res.data) {
-      this.userId = res.data.userId
-    }
+  async handleLogin(@ConnectedSocket() socket: Socket) {
+    const res = await this.wsService.login(socket)
     return res
   }
 }

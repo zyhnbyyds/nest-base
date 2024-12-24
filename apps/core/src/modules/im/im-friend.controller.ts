@@ -8,8 +8,8 @@ export class ImUserFriendController {
   constructor(private imUserFriendService: ImUserFriendService) {}
 
   @Get('/list')
-  friendList() {
-    return this.imUserFriendService.friendList()
+  friendList(@Req() req: FastifyRequestWithAuth) {
+    return this.imUserFriendService.friendList(req.verify.userId)
   }
 
   @Post('/add')

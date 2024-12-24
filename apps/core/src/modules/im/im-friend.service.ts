@@ -8,8 +8,8 @@ import { User } from 'packages/mysql'
 export class ImUserFriendService {
   constructor(private mongoService: MongoService, private mysqlService: MysqlService) {}
 
-  async friendList() {
-    const friends = await this.mongoService.imUserFriend.findMany()
+  async friendList(userId: string) {
+    const friends = await this.mongoService.imUserFriend.findMany({ where: { userId } })
     const friendIds = friends.map(friend => friend.friendId)
 
     const friendIdToUserMap = new Map<string, User>()

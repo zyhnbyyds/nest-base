@@ -15,6 +15,7 @@ export const SOCKET_EVENT = {
   READ_MESSAGE: 'readMessage',
   LOGIN: 'login',
   LOGOUT: 'logout',
+  KICK_OUT: 'kickOut',
   RECONNECT: 'reconnect',
   RECONNECT_ERROR: 'reconnect_error',
   RECONNECT_FAILED: 'reconnect_failed',

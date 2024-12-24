@@ -8,7 +8,7 @@ import { EmailService } from './email.service'
 export class EmailController {
   constructor(private emailService: EmailService) {}
   @MessagePattern({ cmd: MicroServiceMessageEnum.SEND_EMAIL })
-  sendEmail(@Payload() options: Options) {
-    return this.emailService.sendEmail(options)
+  async sendEmail(@Payload() options: Options) {
+    return await this.emailService.sendEmail(options)
   }
 }

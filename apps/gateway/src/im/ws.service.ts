@@ -2,151 +2,148 @@ import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
 import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
 import { RedisCacheKey } from '@libs/common/enums/redis'
-import { MongoService } from '@libs/common/services/prisma.service'
+import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import Redis from 'ioredis'
-import { Server, Socket } from 'socket.io'
+import { Namespace, Server, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 
-interface UserVerify {
-  userId: string
-  email: string
-}
-
 @Injectable()
 export class WsService {
-  private userId: string
-  private server: Server
-  private socket: Socket
+  private server: Namespace
   constructor(
     private mongoService: MongoService,
     private jwtService: JwtService,
+    private mysqlService: MysqlService,
 
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
   ) {
   }
 
-  init(userId: string, server: Server) {
-    this.userId = userId
-    this.server = server
-  }
-
-  async sendMessage(data: SendMessageDto) {
-    if (!this.userId) {
-      // TODO: perf error handle
-      this.server.emit('error', 'login-first')
+  async sendMessage(socket: Socket, data: SendMessageDto) {
+    const userId = socket.handshake.auth.userId
+    if (!userId) {
+      socket.emit('error', 'login-first')
       return false
     }
 
     const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${data.toUser}`)
 
+    const fromUserInfo = await this.mysqlService.user.findUnique({ where: { userId } })
+
+    const messageInfo = {
+      content: data.content,
+      fromUser: fromUserInfo,
+      toUser: data.toUser,
+      messageType: data.messageType,
+    }
+
+    await this.mongoService.imMessage.create({
+      data: {
+        messageId: ulid(),
+        content: data.content,
+        fromUserId: userId,
+        toUserId: data.toUser,
+        status: ImMessageStatusEnum.UNREAD,
+      },
+    })
     if (socketId) {
-      await this.mongoService.imMessage.create({
-        data: {
-          messageId: ulid(),
-          content: data.content,
-          fromUserId: this.userId,
-          toUserId: data.toUser,
-          status: ImMessageStatusEnum.UNREAD,
-        },
-      })
-      this.server.to(socketId).emit('receiveMessage', { content: data.content, fromUser: this.userId, toUser: data.toUser, messageType: data.messageType })
+      return this.server.to(socketId).emit(SOCKET_EVENT.RECEIVE_MESSAGE, messageInfo)
     }
-    else {
-      await this.mongoService.imMessage.create({
-        data: {
-          messageId: ulid(),
-          content: data.content,
-          fromUserId: this.userId,
-          toUserId: data.toUser,
-          status: ImMessageStatusEnum.UNREAD,
-        },
-      })
-      this.server.to(socketId).emit('receiveMessage', data.content)
-    }
+    return false
   }
 
-  async readMessage(data: { toUser: string }) {
+  async readMessage(socket: Socket, data: { toUser: string }) {
+    const userId = socket.handshake.auth.userId
     await this.mongoService.imMessage.updateMany({
       data: {
         status: ImMessageStatusEnum.READ,
       },
       where: {
         toUserId: data.toUser,
-        fromUserId: this.userId,
+        fromUserId: userId,
         status: ImMessageStatusEnum.UNREAD,
       },
     })
   }
 
-  async login(server: Server) {
-    let res: UserVerify | null
+  async login(socket: Socket) {
     try {
-      res = await this.jwtService.verifyAsync<UserVerify>(this.socket.handshake.auth.token)
-    }
-    catch (error) {
-      this.socket.emit('error', error)
-      return Result.fail(error, 403)
-    }
-
-    try {
-      if (!res || !res.userId) {
-        this.socket.emit('error', 'login-error')
-        return Result.fail('login-error')
-      }
-
-      const { userId } = res
-
-      this.userId = userId
-
+      const userId = socket.handshake.auth.userId
       let data = await this.mongoService.imUser.findUnique({ where: { userId } })
       if (!data) {
         data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: '' } })
       }
 
       const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
-      await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, this.socket.id)
-      this.init(userId, server)
+      await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, socket.id)
 
       return Result.success(updateInfo)
     }
     catch (error) {
-      this.socket.emit('error', error)
+      socket.emit('error', error)
       return Result.fail(error)
     }
   }
 
-  afterSeverConnection(socket: Socket) {
+  async afterSeverConnection(socket: Socket, server: Namespace) {
+    const { token, userId } = socket.handshake.auth as { token: string, userId: string }
+    this.server = server
+
+    if (!token) {
+      socket.emit(SOCKET_EVENT.ERROR, 'authentication error')
+      socket.disconnect()
+    }
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        userId: string
+        email: string
+      }>(token)
+
+      const cacheSocketId = await this.redis.get(`${RedisCacheKey.SocketId}${payload.userId}`)
+      const cacheToken = await this.redis.get(`${RedisCacheKey.AuthToken}${payload.userId}`)
+
+      // 如果缓存的socketId和token不一致，那么就踢掉之前的socket
+      if (cacheSocketId !== socket.id || cacheToken !== token) {
+        await this.redis.set(`${RedisCacheKey.SocketId}${payload.userId}`, socket.id)
+        await this.redis.set(`${RedisCacheKey.AuthToken}${payload.userId}`, token)
+        server.sockets.get(cacheSocketId)?.disconnect()
+      }
+    }
+
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    catch (_error) {
+      socket.emit(SOCKET_EVENT.ERROR, 'authentication error')
+      socket.disconnect()
+    }
     socket.emit(SOCKET_EVENT.READY)
 
-    this.socket = socket
-
     socket.on(SOCKET_EVENT.DISCONNECT, async () => {
-      if (this.userId) {
-        const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId: this.userId } })
-        if (!imUserInfo) {
-          await this.mongoService.imUser.create({ data: { ...imUserInfo, status: ImUserStatusEnum.OFFLINE } })
-        }
-        else {
-          await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId: this.userId } })
-        }
+      const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId } })
+      if (!imUserInfo) {
+        await this.mongoService.imUser.create({ data: { status: ImUserStatusEnum.OFFLINE, userName: '', userId } })
       }
+      else {
+        await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId } })
+      }
+      this.redis.del(`${RedisCacheKey.SocketId}${userId}`)
     })
   }
 
-  async createRoom(body: CreateRoomDto) {
+  async createRoom(socket: Socket, body: CreateRoomDto) {
+    const { userId } = socket.handshake.auth
     const res = await this.mongoService.imGroup.create({
       data: {
         ...body,
-        createdBy: this.userId,
+        createdBy: userId,
         groupId: new Snowflake(1, 1).generateId(),
-        masterId: this.userId,
+        masterId: userId,
       },
     })
 

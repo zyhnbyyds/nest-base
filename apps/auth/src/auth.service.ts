@@ -36,7 +36,12 @@ export class AuthService {
 
   async sendEmailCode(body: EmailRegisterDto) {
     await this.emailApp.connect()
-    await lastValueFrom(this.emailApp.send<SMTPTransport.SentMessageInfo>({ cmd: MicroServiceMessageEnum.SEND_EMAIL }, { to: body.email }))
+    try {
+      await lastValueFrom(this.emailApp.send<SMTPTransport.SentMessageInfo>({ cmd: MicroServiceMessageEnum.SEND_EMAIL }, { to: body.email }))
+    }
+    catch (err) {
+      return Result.fail(err)
+    }
     return Result.ok(SuccessMsg.EmailVerifyCodeSendSuccess)
   }
 
