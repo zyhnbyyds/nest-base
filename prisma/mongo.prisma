@@ -54,8 +54,8 @@ model ImMessage {
   @@map("im_message")
 }
 
-model ImUserFriend {
-  id         String   @id @default(auto()) @map("_id") @mongodb.ObjectId
+model ImFriend {
+  id         String   @id @map("_id")
   userId     String   @map("user_id")
   friendId   String   @map("friend_id")
   remark     String?  @map("remark")

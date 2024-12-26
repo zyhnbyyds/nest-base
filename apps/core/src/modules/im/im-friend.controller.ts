@@ -12,6 +12,12 @@ export class ImUserFriendController {
     return this.imUserFriendService.friendList(req.verify.userId)
   }
 
+  @Get('/list/withUnreadMessageCount')
+  findFriendListWithUnreadMessage(@Req() req: FastifyRequestWithAuth) {
+    // TODO: implement this use cache
+    return this.imUserFriendService.findFriendListWithUnreadMessage(req.verify.userId)
+  }
+
   @Post('/add')
   @HttpCode(200)
   friendAdd(@Body() body: AddFriendDto, @Req() req: FastifyRequestWithAuth) {

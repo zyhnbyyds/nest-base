@@ -47,7 +47,7 @@ export class EventsGateway {
   }
 
   @SubscribeMessage(SOCKET_EVENT.READ_MESSAGE)
-  async handleReadMessage(@MessageBody() data: { toUser: string }, @ConnectedSocket() socket: Socket) {
+  async handleReadMessage(@MessageBody() data: { friendId: string }, @ConnectedSocket() socket: Socket) {
     await this.wsService.readMessage(socket, data)
   }
 

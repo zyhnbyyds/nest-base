@@ -1,15 +1,18 @@
+import { ImMessageStatusEnum } from '@libs/common/enums/im'
 import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Injectable } from '@nestjs/common'
-import { ImUserFriend } from 'packages/mongo'
+import { ImFriend } from 'packages/mongo'
 import { User } from 'packages/mysql'
+import { ulid } from 'ulid'
+import { ImErrorMsg } from './config/error'
 
 @Injectable()
 export class ImUserFriendService {
   constructor(private mongoService: MongoService, private mysqlService: MysqlService) {}
 
   async friendList(userId: string) {
-    const friends = await this.mongoService.imUserFriend.findMany({ where: { userId } })
+    const friends = await this.mongoService.imFriend.findMany({ where: { userId } })
     const friendIds = friends.map(friend => friend.friendId)
 
     const friendIdToUserMap = new Map<string, User>()
@@ -29,12 +32,69 @@ export class ImUserFriendService {
     return Result.success(friendsWithUserInfo)
   }
 
+  async findFriendListWithUnreadMessage(userId: string) {
+    const unreadCountMap = new Map<string, number>()
+    const friendIdToUserMap = new Map<string, User>()
+
+    const friendList = await this.mongoService.imFriend.findMany({
+      where: { userId },
+    })
+
+    const friendIds = friendList.map(item => item.friendId)
+
+    if (friendIds.length === 0) {
+      return Result.success([])
+    }
+
+    const unreadCounts = await this.mongoService.imMessage.groupBy({
+      by: ['fromUserId'],
+      where: {
+        fromUserId: { in: friendIds },
+        toUserId: userId,
+        status: ImMessageStatusEnum.UNREAD,
+      },
+      _count: { fromUserId: true },
+    })
+
+    unreadCounts.forEach((item) => {
+      unreadCountMap.set(item.fromUserId, item._count.fromUserId)
+    })
+
+    const friendUserInfoList = await this.mysqlService.user.findMany({ where: { userId: { in: friendIds } } })
+
+    friendUserInfoList.forEach((item) => {
+      friendIdToUserMap.set(item.userId, item)
+    })
+
+    const friendsWithUserInfo = friendList.map((item) => {
+      return {
+        ...item,
+        unreadCount: unreadCountMap.get(item.friendId) || 0,
+        user: friendIdToUserMap.get(item.friendId),
+      }
+    })
+
+    return Result.success(friendsWithUserInfo)
+  }
+
   async friendAdd(userId: string, friendId: string) {
     try {
-      await this.mongoService.imUserFriend.create({
+      const friend = await this.mongoService.imFriend.findFirstOrThrow({
+        where: {
+          userId,
+          friendId,
+        },
+      })
+
+      if (friend) {
+        return Result.fail(ImErrorMsg.ImFrindHasExist)
+      }
+
+      await this.mongoService.imFriend.create({
         data: {
           userId,
           friendId,
+          id: ulid(),
         },
       })
       return Result.ok()
@@ -46,7 +106,7 @@ export class ImUserFriendService {
 
   async friendDelete(id: string) {
     try {
-      await this.mongoService.imUserFriend.delete({
+      await this.mongoService.imFriend.delete({
         where: {
           id,
         },
@@ -57,9 +117,9 @@ export class ImUserFriendService {
     }
   }
 
-  async friendUpdate(id: string, friendInfo: ImUserFriend) {
+  async friendUpdate(id: string, friendInfo: ImFriend) {
     try {
-      await this.mongoService.imUserFriend.update({
+      await this.mongoService.imFriend.update({
         where: {
           id,
         },
@@ -73,7 +133,7 @@ export class ImUserFriendService {
 
   async friendSearch(searchVal: string) {
     try {
-      await this.mongoService.imUserFriend.findMany({
+      await this.mongoService.imFriend.findMany({
         where: {
           OR: [
             {

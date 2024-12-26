@@ -8,7 +8,7 @@ import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import Redis from 'ioredis'
-import { Namespace, Server, Socket } from 'socket.io'
+import { Namespace, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
@@ -26,6 +26,7 @@ export class WsService {
   ) {
   }
 
+  // TODO: add message validation to send before sending(now me to anyone but not friend)
   async sendMessage(socket: Socket, data: SendMessageDto) {
     const userId = socket.handshake.auth.userId
     if (!userId) {
@@ -59,18 +60,21 @@ export class WsService {
     return false
   }
 
-  async readMessage(socket: Socket, data: { toUser: string }) {
+  async readMessage(socket: Socket, data: { friendId: string }) {
     const userId = socket.handshake.auth.userId
+
     await this.mongoService.imMessage.updateMany({
       data: {
         status: ImMessageStatusEnum.READ,
       },
       where: {
-        toUserId: data.toUser,
-        fromUserId: userId,
+        toUserId: userId,
+        fromUserId: data.friendId,
         status: ImMessageStatusEnum.UNREAD,
       },
     })
+
+    socket.emit(SOCKET_EVENT.FRIEND_READ_MESSAGE, data.friendId)
   }
 
   async login(socket: Socket) {

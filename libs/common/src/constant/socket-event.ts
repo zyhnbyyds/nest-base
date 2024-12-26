@@ -13,6 +13,7 @@ export const SOCKET_EVENT = {
   RECEIVE_MESSAGE: 'receiveMessage',
   LEAVE_ROOM: 'leaveRoom',
   READ_MESSAGE: 'readMessage',
+  FRIEND_READ_MESSAGE: 'friendReadMessage',
   LOGIN: 'login',
   LOGOUT: 'logout',
   KICK_OUT: 'kickOut',
