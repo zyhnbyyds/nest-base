@@ -6,6 +6,7 @@ import { DynamicModule, Logger, Type, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
+import { Test, TestingModule } from '@nestjs/testing'
 import { WinstonModule } from 'nest-winston'
 import { NATS_TIMEOUT } from '../constant'
 import { SubAppPortEnum } from '../enums/subapps'
@@ -83,4 +84,17 @@ export async function microBootstrap(options: MicroBootstrapOptions) {
 
   await app.listen()
   Logger.log(`Micro-${options.name} running on the nats ${SubAppPortEnum.Nats}`)
+}
+
+export async function testBootstrap(options: Pick<BootstrapOptions, 'module'>) {
+  const appFeature: TestingModule = await Test.createTestingModule({
+    imports: [options.module],
+  }).compile()
+
+  const app = appFeature.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
+
+  await app.init()
+  await app.getHttpAdapter().getInstance().ready()
+
+  return app
 }

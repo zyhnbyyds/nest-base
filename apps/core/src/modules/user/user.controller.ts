@@ -1,7 +1,7 @@
 import { FastifyRequestWithAuth } from '@libs/common/types/interface'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common'
 import { User } from '@zgyh/prisma-mysql'
-import { CreateUserDto } from './dto/createUser.dto'
+import { CreateUserDto, CreateUserDtoWithoutEmail } from './dto/createUser.dto'
 import { GetUserListDto } from './dto/get-user-list-dto'
 import { UserService } from './user.service'
 
@@ -40,7 +40,7 @@ export class UserController {
   }
 
   @Post('/createUserFromRegisterUser')
-  createUserFromRegisterUser(@Body() user: CreateUserDto) {
-    return this.userService.create(user, false)
+  createUserFromRegisterUser(@Body() user: CreateUserDtoWithoutEmail, @Req() req: FastifyRequestWithAuth) {
+    return this.userService.createUserFromRegisterUser(user, req.verify)
   }
 }

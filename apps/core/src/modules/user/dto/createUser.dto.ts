@@ -36,11 +36,6 @@ export class CreateUserDtoWithoutEmail {
   @IsString()
   @MaxLength(32)
   phone: string
-
-  @Length(17)
-  @IsString()
-  @IsOptional()
-  userId: string | null
 }
 
 export class CreateUserDto extends CreateUserDtoWithoutEmail {
