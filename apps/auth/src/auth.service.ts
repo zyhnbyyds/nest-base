@@ -52,7 +52,6 @@ export class AuthService {
         return Result.fail(EmailErrorMsg.EmailVerifyCodeError)
       }
 
-      this.delEmailCode(body.email)
       // if has registered return register info
       let registeredUser = await this.mysqlService.registerUser.findUnique({ where: { email: body.email }, select: { userId: true, status: true, email: true } })
 
