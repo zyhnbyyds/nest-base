@@ -22,7 +22,7 @@ const registerUser = {
   status: 0,
 }
 
-describe('authController', () => {
+describe('apps-Auth (e2e)', () => {
   let app: NestFastifyApplication
   const redis = new Redis()
   let mysqlClient: PrismaClient
