@@ -53,17 +53,15 @@ export const winstonLoggerOptions: LoggerOptions = {
           maxSize: '20m',
           level: 'debug',
           maxFiles: '14d',
+        }), new ElasticsearchTransport({
+          level: 'info',
+          clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
+          indexPrefix: 'nest-logs-info',
+        }), new ElasticsearchTransport({
+          level: 'error',
+          clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
+          indexPrefix: 'nest-logs-error',
         })]
       : []),
-    new ElasticsearchTransport({
-      level: 'info',
-      clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
-      indexPrefix: 'nest-logs-info',
-    }),
-    new ElasticsearchTransport({
-      level: 'error',
-      clientOpts: { node: 'http://localhost:9200', auth: { username: 'elastic', password: 'changeme' } },
-      indexPrefix: 'nest-logs-error',
-    }),
   ],
 }

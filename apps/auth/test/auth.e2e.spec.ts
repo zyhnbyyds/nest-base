@@ -1,12 +1,43 @@
 import { testBootstrap } from '@libs/common/utils/bootstrap'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
+import { PrismaClient } from '@zgyh/prisma-mysql'
 import Redis from 'ioredis'
 import { AuthModule } from '../src/auth.module'
 
+const testRegisterUser = {
+  userId: '28382628060000000',
+  openId: '28382628060000001',
+  email: 'test-register@qq.com',
+  password: '123456',
+  nickname: 'test-register',
+  avatarUrl: 'https://avatars.githubusercontent.com/u/100000000?v=4',
+  userName: 'test-register',
+  phone: '13456789201',
+  gender: 'male',
+}
+
+const registerUser = {
+  userId: '28382628060000000',
+  email: 'test-register@qq.com',
+  status: 0,
+}
+
 describe('authController', () => {
   let app: NestFastifyApplication
-
+  const redis = new Redis()
+  let mysqlClient: PrismaClient
   beforeEach(async () => {
+    mysqlClient = new PrismaClient()
+
+    await redis.set('email_service:test-register@qq.com', '222222')
+    await redis.set('email_service:test@test.com', '111111')
+    await mysqlClient.$connect()
+
+    await mysqlClient.$transaction([
+      mysqlClient.user.create({ data: testRegisterUser }),
+      mysqlClient.registerUser.create({ data: registerUser }),
+    ])
+
     app = await testBootstrap({
       module: AuthModule,
     })
@@ -17,7 +48,7 @@ describe('authController', () => {
       method: 'POST',
       url: '/auth/sendEmailCode',
       payload: {
-        email: 'test@test111.com',
+        email: 'test-send-code@test.com',
       },
     })
     expect(res.statusCode).toBe(200)
@@ -48,6 +79,8 @@ describe('authController', () => {
     })
     expect(res_2.statusCode).toBe(200)
     expect(res_2.json().code).toBe(0)
+    expect(res_2.json().data.token).toBeDefined()
+    expect(res_2.json().data.verify.status).toBe(1)
   })
 
   it('/auth/loginUseEmail (POST) (correct2: email-code -> registered user)', async () => {
@@ -61,9 +94,24 @@ describe('authController', () => {
     })
     expect(res_3.statusCode).toBe(200)
     expect(res_3.json().code).toBe(0)
+    expect(res_3.json().data.token).toBeDefined()
+    expect(res_3.json().data.verify.status).toBe(0)
   })
 
   afterEach(async () => {
+    await redis.del('email_service:test-register@qq.com')
+    await redis.del('email_service:test@test.com')
+    await redis.del('email_service:test-send-code@test.com')
+
+    await mysqlClient.$transaction([
+      mysqlClient.user.delete({ where: { email: testRegisterUser.email } }),
+      mysqlClient.registerUser.delete({ where: { email: registerUser.email } }),
+    ])
     await app.close()
+  })
+
+  afterAll(async () => {
+    await redis.quit()
+    await mysqlClient.$disconnect()
   })
 })
