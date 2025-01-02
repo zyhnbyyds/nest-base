@@ -64,10 +64,11 @@ export class UserService {
     return this.mysqlService.user.delete({ where: { userId } })
   }
 
-  createUserFromRegisterUser(user: CreateUserDtoWithoutEmail, verify: {
+  async createUserFromRegisterUser(user: CreateUserDtoWithoutEmail, verify: {
     userId: string
     email: string
   }) {
-    return this.create({ ...user, email: verify.email }, verify.userId)
+    await this.create({ ...user, email: verify.email }, verify.userId)
+    return Result.ok()
   }
 }

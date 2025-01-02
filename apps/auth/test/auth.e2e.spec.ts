@@ -1,3 +1,4 @@
+import { RedisCacheKey } from '@libs/common/enums/redis'
 import { testBootstrap } from '@libs/common/utils/bootstrap'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
 import { PrismaClient } from '@zgyh/prisma-mysql'
@@ -6,7 +7,7 @@ import { AuthModule } from '../src/auth.module'
 
 const testRegisterUser = {
   userId: '28382628060000000',
-  openId: '28382628060000001',
+  openId: '28382628060000222',
   email: 'test-register@qq.com',
   password: '123456',
   nickname: 'test-register',
@@ -29,8 +30,8 @@ describe('apps-Auth (e2e)', () => {
   beforeEach(async () => {
     mysqlClient = new PrismaClient()
 
-    await redis.set('email_service:test-register@qq.com', '222222')
-    await redis.set('email_service:test@test.com', '111111')
+    await redis.set('email_service:test-register@qq.com', 'auth11')
+    await redis.set('email_service:test@test.com', 'auth22')
     await mysqlClient.$connect()
 
     await mysqlClient.$transaction([
@@ -74,7 +75,7 @@ describe('apps-Auth (e2e)', () => {
       url: '/auth/loginUseEmail',
       payload: {
         email: 'test@test.com',
-        code: '111111',
+        code: 'auth22',
       },
     })
     expect(res_2.statusCode).toBe(200)
@@ -89,7 +90,7 @@ describe('apps-Auth (e2e)', () => {
       url: '/auth/loginUseEmail',
       payload: {
         email: 'test-register@qq.com',
-        code: '222222',
+        code: 'auth11',
       },
     })
     expect(res_3.statusCode).toBe(200)
@@ -102,11 +103,14 @@ describe('apps-Auth (e2e)', () => {
     await redis.del('email_service:test-register@qq.com')
     await redis.del('email_service:test@test.com')
     await redis.del('email_service:test-send-code@test.com')
+    await redis.del(`${RedisCacheKey.AuthToken}${testRegisterUser.userId}`)
 
+    // MARK: 在删除的时候, Prisma事务执行多个delete需要进行合并使用deleteMany, 否则会报错
     await mysqlClient.$transaction([
-      mysqlClient.user.delete({ where: { email: testRegisterUser.email } }),
-      mysqlClient.registerUser.delete({ where: { email: registerUser.email } }),
+      mysqlClient.user.deleteMany({ where: { email: { in: [testRegisterUser.email] } } }),
+      mysqlClient.registerUser.deleteMany({ where: { email: { in: [registerUser.email, 'test@test.com'] } } }),
     ])
+
     await app.close()
   })
 

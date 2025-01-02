@@ -17,4 +17,24 @@ export class GetUserListDto extends PageDto {
   @IsString()
   @IsOptional()
   country?: string
+
+  @IsString()
+  @IsOptional()
+  province?: string
+
+  @IsString()
+  @IsOptional()
+  userName?: string
+
+  @IsString()
+  @IsOptional()
+  nickName?: string
+
+  @IsString()
+  @IsOptional()
+  phone?: string
+
+  @IsString()
+  @IsOptional()
+  email?: string
 }
