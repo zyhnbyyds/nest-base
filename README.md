@@ -10,3 +10,16 @@
 
 ### Auth
  - port 3005
+
+## test
+
+### start
+```
+pnpm test
+```
+
+### cover
+ - core
+ - auth
+ - gateway
+ - email
