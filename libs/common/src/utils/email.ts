@@ -11,8 +11,8 @@ export function combineEmailOptions(options: Options): [Options, string] {
   const { text, subject } = options
   return [{
     from: process.env.EMAIL_USER,
-    subject: text as string || 'Verification code',
-    text: subject || `text - Your verification code is <h3 style="color: red">${code}</h3>`,
+    subject: subject as string || 'Verification code',
+    text: text || `text - Your verification code is <h3 style="color: red">${code}</h3>`,
     to: options.to,
   }, code]
 }

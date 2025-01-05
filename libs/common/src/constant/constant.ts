@@ -33,4 +33,5 @@ export const SOCKET_NAMESPACE_IM = 'im'
 export const SOCKET_ORIGIN_EXCLUDE = [
   'https://admin.socket.io',
   'http://localhost:3300',
+  '*',
 ]

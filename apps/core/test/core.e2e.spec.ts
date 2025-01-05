@@ -1,5 +1,4 @@
 import { RedisCacheKey } from '@libs/common/enums/redis'
-import { SubAppRoutePrefixEnum } from '@libs/common/enums/subapps'
 import { testBootstrap } from '@libs/common/utils/bootstrap'
 import { JwtService } from '@nestjs/jwt'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'

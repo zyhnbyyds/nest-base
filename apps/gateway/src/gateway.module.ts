@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common'
-import { WsModule } from './im/ws.module'
+import { ImModule } from './im/im.module'
 
 @Module({
-  imports: [WsModule],
-  controllers: [],
-  providers: [],
+  imports: [ImModule],
 })
 export class GatewayModule {}

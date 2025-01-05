@@ -93,6 +93,7 @@ export function customValidateEnv(config: Record<string, unknown>) {
     config,
     { enableImplicitConversion: true },
   )
+
   const errors = validateSync(validatedConfig, { skipMissingProperties: false })
 
   if (errors.length > 0) {

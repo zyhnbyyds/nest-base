@@ -46,14 +46,15 @@ export class UserService {
 
   async findOne(userId: string) {
     const user = await this.mysqlService.user.findUnique({ where: { userId } })
-    const imUser = await this.mongoService.imUser.findUnique({ where: { userId } })
-    if (!user && !imUser) {
+    const registerUser = await this.mysqlService.registerUser.findUnique({ where: { userId } })
+
+    if (!user && !registerUser) {
       return Result.fail(UserErrorMsg.UserNotFound)
     }
-    if (!user && imUser) {
-      return Result.success({ imUser, user: null })
+    if (!user && registerUser) {
+      return Result.success({ registerUser, user: null })
     }
-    return Result.success({ user, imUser: null })
+    return Result.success({ user, registerUser: null })
   }
 
   update(userId: string, updateUserDto: User) {

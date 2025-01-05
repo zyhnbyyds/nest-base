@@ -1,3 +1,4 @@
+import { AuthConfig } from '@libs/common/config/interface'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
 import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
@@ -6,15 +7,17 @@ import { MongoService, MysqlService } from '@libs/common/services/prisma.service
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import Redis from 'ioredis'
+import ms, { StringValue } from 'ms'
 import { Namespace, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 
 @Injectable()
-export class WsService {
+export class ImService {
   private server: Namespace
   constructor(
     private mongoService: MongoService,
@@ -23,6 +26,8 @@ export class WsService {
 
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
+
+    private configService: ConfigService,
   ) {
   }
 
@@ -55,7 +60,8 @@ export class WsService {
       },
     })
     if (socketId) {
-      return this.server.to(socketId).emit(SOCKET_EVENT.RECEIVE_MESSAGE, messageInfo)
+      await this.server.to(socketId).emitWithAck(SOCKET_EVENT.RECEIVE_MESSAGE, messageInfo)
+      return true
     }
     return false
   }
@@ -80,6 +86,10 @@ export class WsService {
   async login(socket: Socket) {
     try {
       const userId = socket.handshake.auth.userId
+      if (!userId) {
+        return Result.fail()
+      }
+
       let data = await this.mongoService.imUser.findUnique({ where: { userId } })
       if (!data) {
         data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: '' } })
@@ -114,10 +124,14 @@ export class WsService {
       const cacheToken = await this.redis.get(`${RedisCacheKey.AuthToken}${payload.userId}`)
 
       // 如果缓存的socketId和token不一致，那么就踢掉之前的socket
-      if (cacheSocketId !== socket.id || cacheToken !== token) {
+      const { expiresIn } = this.configService.get<AuthConfig>('jwt')
+      if (cacheSocketId && cacheToken && (cacheSocketId !== socket.id || cacheToken !== token)) {
         await this.redis.set(`${RedisCacheKey.SocketId}${payload.userId}`, socket.id)
-        await this.redis.set(`${RedisCacheKey.AuthToken}${payload.userId}`, token)
+        await this.redis.set(`${RedisCacheKey.AuthToken}${userId}`, token, 'PX', ms(expiresIn as StringValue))
         server.sockets.get(cacheSocketId)?.disconnect()
+      }
+      else if (!cacheSocketId) {
+        await this.redis.set(`${RedisCacheKey.SocketId}${payload.userId}`, socket.id)
       }
     }
 

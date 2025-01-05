@@ -7,7 +7,7 @@ import { instrument } from '@socket.io/admin-ui'
 import { Namespace, Server, Socket } from 'socket.io'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
-import { WsService } from './ws.service'
+import { ImService } from './im.service'
 
 @WebSocketGateway(SubAppPortEnum.GatewayEvent, {
   cors: {
@@ -19,12 +19,12 @@ import { WsService } from './ws.service'
   namespace: SOCKET_NAMESPACE_IM,
 })
 
-export class EventsGateway {
+export class ImGateway {
   @WebSocketServer()
   server: Server
 
   constructor(
-    private readonly wsService: WsService,
+    private readonly wsService: ImService,
   ) {
   }
 
