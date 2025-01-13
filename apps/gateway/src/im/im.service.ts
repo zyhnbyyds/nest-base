@@ -2,18 +2,23 @@ import { AuthConfig } from '@libs/common/config/interface'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
 import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
+import { NotificationTitle } from '@libs/common/enums/notification'
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { ImErrorMsg } from 'apps/core/src/modules/im/config/error'
+import { format } from 'date-fns'
 import Redis from 'ioredis'
 import ms, { StringValue } from 'ms'
+import { NotificationType } from 'packages/mysql'
 import { Namespace, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { CreateRoomDto } from './dto/create-room.dto'
+import { AddFriendDto, AdmitAddFriendDto } from './dto/friend.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 
 @Injectable()
@@ -168,5 +173,127 @@ export class ImService {
     // const joinInfo = await this.socket.join(res.groupId)
     // console.log(joinInfo, this.socket.rooms)
     return res
+  }
+
+  /**
+   * 处理好友申请
+   * @param admitInfo
+   * @returns
+   */
+  async friendAddAdmit(socket: Socket, admitInfo: AdmitAddFriendDto) {
+    const userId = socket.handshake.auth.userId
+    try {
+      const { status } = admitInfo
+      const applyInfo = await this.mongoService.imFriendApply.findUnique({
+        where: {
+          id: admitInfo.id,
+        },
+      })
+
+      if (!applyInfo || (userId !== applyInfo.friendId)) {
+        return Result.fail(ImErrorMsg.InvalidFriend)
+      }
+
+      // 申请过期了
+      if (Number.parseInt(format(applyInfo.expireAt, 'T')) < Number.parseInt(format(new Date(), 'T'))) {
+        return Result.fail(ImErrorMsg.FriendAddExpired)
+      }
+
+      if (status === 0) {
+        const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${applyInfo.friendId}`)
+
+        const notification = await this.mysqlService.notification.create({
+          data: {
+            notificationId: (new Snowflake(1, 1)).generateId(),
+            title: NotificationTitle.FriendAddAdmit,
+            notificationType: NotificationType.APPLY_RESULT,
+            toUserId: applyInfo.friendId,
+            fromUserId: applyInfo.userId,
+          },
+        })
+
+        this.server.to(socketId).emit(SOCKET_EVENT.NOTIFICATION, notification)
+
+        await this.mongoService.imFriend.create({
+          data: {
+            userId: applyInfo.userId,
+            friendId: applyInfo.friendId,
+            remark: applyInfo.remark,
+            id: (new Snowflake(1, 1)).generateId(),
+          },
+        })
+      }
+      else if (status === 1) {
+        await this.mongoService.imFriendApply.update({
+          where: {
+            id: admitInfo.id,
+          },
+          data: {
+            status: 2,
+          },
+        })
+      }
+      return Result.ok()
+    }
+    catch (error) {
+      return Result.fail(error)
+    }
+  }
+
+  async friendAdd(socket: Socket, friendInfo: AddFriendDto) {
+    try {
+      const userId = socket.handshake.auth.userId
+
+      const { friendId } = friendInfo
+      const friend = await this.mongoService.imFriend.findFirst({
+        where: {
+          userId,
+          friendId,
+        },
+      })
+
+      if (friend) {
+        return Result.fail(ImErrorMsg.ImFriendHasExist)
+      }
+
+      const applyRecord = await this.mongoService.imFriendApply.findFirst({
+        where: {
+          userId,
+          friendId,
+        },
+      })
+
+      if (applyRecord) {
+        return Result.fail(ImErrorMsg.FriendAddApplyIsExist)
+      }
+
+      const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${friendId}`)
+      const notification = await this.mysqlService.notification.create({
+        data: {
+          notificationId: (new Snowflake(1, 1)).generateId(),
+          title: NotificationTitle.FriendAdd,
+          notificationType: NotificationType.APPLY,
+          toUserId: friendId,
+          fromUserId: userId,
+        },
+      })
+
+      this.server.to(socketId).emit(SOCKET_EVENT.NOTIFICATION, notification)
+
+      await this.mongoService.imFriendApply.create({
+        data: {
+          userId,
+          friendId,
+          expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          id: (new Snowflake(1, 1)).generateId(),
+        },
+      })
+
+      return Result.ok()
+    }
+    catch (error) {
+      Logger.error(error)
+      return Result.fail(error)
+    }
   }
 }

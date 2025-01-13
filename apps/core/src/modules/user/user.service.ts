@@ -1,6 +1,5 @@
 import { UserErrorMsg } from '@libs/common/enums/error'
-import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
-import { YYYYMMDDHHmmss } from '@libs/common/utils/moment'
+import { MysqlService } from '@libs/common/services/prisma.service'
 import { transformPageToOrmQry } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
@@ -12,7 +11,7 @@ import { GetUserListDto } from './dto/get-user-list-dto'
 
 @Injectable()
 export class UserService {
-  constructor(private mysqlService: MysqlService, private mongoService: MongoService) {}
+  constructor(private mysqlService: MysqlService) {}
 
   async create(createUserDto: CreateUserDto, userId: string = '') {
     const snowflake = new Snowflake(1, 1)
@@ -21,8 +20,6 @@ export class UserService {
       ...createUserDto,
       userId: userId || snowflake.generateId(),
       lastLoginTime: null,
-      createdAt: YYYYMMDDHHmmss(),
-      updatedAt: null,
       isDelete: false,
       openId: snowflake.generateId(),
     }, select: { userId: true, openId: true } })

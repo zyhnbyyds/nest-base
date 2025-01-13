@@ -36,6 +36,10 @@ export class CreateUserDtoWithoutEmail {
   @IsString()
   @MaxLength(32)
   phone: string
+
+  @IsOptional()
+  @IsString()
+  timeZone: string | null
 }
 
 export class CreateUserDto extends CreateUserDtoWithoutEmail {

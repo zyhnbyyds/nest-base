@@ -1,7 +1,6 @@
 generator client {
   provider = "prisma-client-js"
   output = "../packages/mysql"
-  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
@@ -21,12 +20,13 @@ model User {
   country       String?   @map("country") @db.VarChar(10)
   phone         String    @map("phone_number") @db.VarChar(32)
   lastLoginTime String?   @map("last_login_time")
-  createdAt     DateTime  @default(dbgenerated("NOW()")) @db.Time() @map("created_at")
-  updatedAt     DateTime  @default(dbgenerated("NOW() ON UPDATE NOW()")) @db.Timestamp(0) @map("updated_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @map("updated_at")
   isDelete      Boolean?  @default(false) @map("is_delete")
   email         String    @unique @map("email") @db.VarChar(20)
   password      String    @map("password") @db.VarChar(60)
   ip            String?   @map("ip")
+  timeZone      String?   @map("time_zone")
   @@map("user")
 }
 
@@ -35,8 +35,37 @@ model RegisterUser {
   isDelete     Boolean? @default(false) @map("is_delete")
   status       Int?     @default(0)
   email        String?  @unique @map("email") @db.VarChar(20)
-  createdAt    DateTime @db.Time() @map("created_at")
-  updatedAt    DateTime @db.Timestamp(0) @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
   
   @@map("register_user")
+}
+
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  COMMENT
+  REPLY
+  AT
+  SYSTEM
+  MESSAGE
+  APPLY
+  APPLY_RESULT
+  REPORT
+  REPORT_RESULT
+}
+
+model Notification {
+  notificationId  String    @id @map("notification_id") @db.VarChar(20)
+  notificationType NotificationType @map("notification_type")
+  fromUserId      String?   @map("from_user_id") @db.VarChar(20)
+  toUserId        String?   @map("to_user_id") @db.VarChar(20)
+  title           String    @map("title") @db.VarChar(20)
+  content         String?    @map("content") @db.VarChar(100)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  isDelete        Boolean?  @default(false) @map("is_delete")
+
+  @@map("notification")
 }

@@ -2,6 +2,8 @@ export enum ImErrorMsg {
   LoginFirst = 'login-first',
   InvalidMessage = 'invalid-message',
   InvalidFriend = 'invalid-friend',
+  FriendAddExpired = '好友申请已经过期',
+  FriendAddApplyIsExist = '好友申请已经存在',
   InvalidRoom = 'invalid-room',
   ImFriendHasExist = 'im-friend-has-exist',
   NoPermission = 'no-permission',

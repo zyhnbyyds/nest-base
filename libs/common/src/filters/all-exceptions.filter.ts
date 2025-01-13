@@ -1,3 +1,4 @@
+import { inspect } from 'node:util'
 import {
   ArgumentsHost,
   Catch,
@@ -12,7 +13,7 @@ import { Result } from '../utils/result'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private isTest = false) {}
+  constructor() {}
   catch(exception: unknown, next: ArgumentsHost) {
     const host = next.switchToHttp()
     const response = host.getResponse<FastifyReply>()
@@ -22,13 +23,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR
 
-    if (!this.isTest) {
-      Logger.error(
-        `${request.method} ${request.url} reason -> ${
-          isObject(exception) ? JSON.stringify(exception) : exception
-        }`,
-      )
-    }
+    Logger.error(
+      `${request.method} ${request.url} reason -> ${
+        isObject(exception) ? inspect(exception, { depth: null, colors: true }) : exception
+      }`,
+    )
+
     response.status(status <= 500 ? 200 : status).send(Result.fail(exception, status))
   }
 }

@@ -1,10 +1,12 @@
 import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKET_PING_TIMEOUT } from '@libs/common/constant'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
+import { Snowflake } from '@libs/common/utils/snow-flake'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { instrument } from '@socket.io/admin-ui'
 import { Namespace, Server, Socket } from 'socket.io'
 import { CreateRoomDto } from './dto/create-room.dto'
+import { AddFriendDto, AdmitAddFriendDto } from './dto/friend.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 import { ImService } from './im.service'
 
@@ -73,5 +75,15 @@ export class ImGateway {
   async handleLogin(@ConnectedSocket() socket: Socket) {
     const res = await this.wsService.login(socket)
     return res
+  }
+
+  @SubscribeMessage(SOCKET_EVENT.HANDLE_FRIEND_ADD)
+  async friendAddAdmit(@ConnectedSocket() socket: Socket, @MessageBody() data: AdmitAddFriendDto) {
+    return await this.wsService.friendAddAdmit(socket, data)
+  }
+
+  @SubscribeMessage(SOCKET_EVENT.SEND_FRIEND_ADD)
+  async friendAdd(@ConnectedSocket() socket: Socket, @MessageBody() data: AddFriendDto) {
+    return await this.wsService.friendAdd(socket, data)
   }
 }
