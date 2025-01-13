@@ -11,13 +11,13 @@ datasource mongodb {
 model ImUser {
   userId       String    @id @map("_id")
   status       Int?      @default(0)
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime  @default(now()) @mongodb.Date
   updatedAt    DateTime  @updatedAt
   userName     String    @map("user_name")
   isDelete     Boolean?  @default(false)
   ImGroupIds   String[]  @map("group_ids")
   ImGroups     ImGroup[] @relation(fields: [ImGroupIds], references: [groupId])
-  lastActiveAt DateTime  @default(now())
+  lastActiveAt DateTime  @default(now()) @mongodb.Date
 
   @@map("im_user")
 }
@@ -31,7 +31,7 @@ model ImGroup {
   masterId    String   @map("master_id")
   slaveIds    String[] @map("slave_ids")
   slaves      ImUser[] @relation(fields: [slaveIds], references: [userId])
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @mongodb.Date
   updatedAt   DateTime @updatedAt
   isDelete    Boolean? @default(false)
 
@@ -47,7 +47,7 @@ model ImMessage {
   content    String   @map("content") @mongodb.String
   type       Int?     @default(0)
   status     Int?     @default(0)
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @mongodb.Date
   updatedAt  DateTime @updatedAt
   isDelete   Boolean? @default(false)
 
@@ -59,9 +59,25 @@ model ImFriend {
   userId     String   @map("user_id")
   friendId   String   @map("friend_id")
   remark     String?  @map("remark")
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @mongodb.Date 
   updatedAt  DateTime @updatedAt
   isDelete   Boolean? @default(false)
 
   @@map("im_user_friend")
+}
+
+model ImFriendApply {
+  id         String   @id @map("_id")
+  userId     String   @map("user_id")
+  friendId   String   @map("friend_id")
+  nickName   String?  @map("nick_name")
+  remark     String?  @map("remark")
+  status     Int?     @default(0)
+  createdAt  DateTime @default(now()) @mongodb.Date
+  expireAt   DateTime
+  updatedAt  DateTime @updatedAt
+  isDelete   Boolean? @default(false)
+  isExpired  Boolean? @default(false)
+
+  @@map("im_friend_apply")
 }

@@ -1,6 +1,5 @@
 import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKET_PING_TIMEOUT } from '@libs/common/constant'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
-import { SubAppPortEnum } from '@libs/common/enums/subapps'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { instrument } from '@socket.io/admin-ui'
@@ -9,7 +8,7 @@ import { CreateRoomDto } from './dto/create-room.dto'
 import { SendMessageDto } from './dto/send-message.dto'
 import { ImService } from './im.service'
 
-@WebSocketGateway(SubAppPortEnum.GatewayEvent, {
+@WebSocketGateway({
   cors: {
     origin: SOCKET_ORIGIN_EXCLUDE,
     credentials: true,
@@ -18,7 +17,6 @@ import { ImService } from './im.service'
   pingTimeout: SOCKET_PING_TIMEOUT,
   namespace: SOCKET_NAMESPACE_IM,
 })
-
 export class ImGateway {
   @WebSocketServer()
   server: Server

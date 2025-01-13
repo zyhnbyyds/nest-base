@@ -68,6 +68,8 @@ export enum MicroServiceNameEnum {
   EMAIL_SERVICE = 'email_service',
   /** Redis微服务 */
   REDIS_SERVICE = 'redis_service',
+  /** 通知系统微服务 */
+  NOTIFICATION_SERVICE = 'notification_service',
 }
 
 export const LocalHost = 'localhost'

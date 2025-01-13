@@ -1,6 +1,6 @@
 import { FastifyRequestWithAuth } from '@libs/common/types/interface'
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Req } from '@nestjs/common'
-import { AddFriendDto } from './dto/add-friend.dto'
+import { AddFriendDto, AdmitAddFriendDto } from './dto/add-friend.dto'
 import { ImUserFriendService } from './im-friend.service'
 
 @Controller('/im/friend')
@@ -18,11 +18,23 @@ export class ImUserFriendController {
     return this.imUserFriendService.findFriendListWithUnreadMessage(req.verify.userId)
   }
 
+  /**
+   * 发送添加好友申请
+   */
   @Post('/add')
   @HttpCode(200)
   friendAdd(@Body() body: AddFriendDto, @Req() req: FastifyRequestWithAuth) {
-    const { friendId } = body
-    return this.imUserFriendService.friendAdd(req.verify.userId, friendId)
+    return this.imUserFriendService.friendAdd(req.verify.userId, body)
+  }
+
+  /**
+   * 处理好友申请
+   * @returns
+   */
+  @Post('/add/admit')
+  @HttpCode(200)
+  friendAddAdmit(@Body() body: AdmitAddFriendDto, @Req() req: FastifyRequestWithAuth) {
+    return this.imUserFriendService.friendAddAdmit(req.verify.userId, body)
   }
 
   @Delete(':id')

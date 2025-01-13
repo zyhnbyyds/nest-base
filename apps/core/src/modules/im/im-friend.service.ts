@@ -1,11 +1,13 @@
 import { ImMessageStatusEnum } from '@libs/common/enums/im'
 import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
+import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable } from '@nestjs/common'
 import { ImFriend } from 'packages/mongo'
 import { User } from 'packages/mysql'
 import { ulid } from 'ulid'
 import { ImErrorMsg } from './config/error'
+import { AddFriendDto, AdmitAddFriendDto } from './dto/add-friend.dto'
 
 @Injectable()
 export class ImUserFriendService {
@@ -77,9 +79,10 @@ export class ImUserFriendService {
     return Result.success(friendsWithUserInfo)
   }
 
-  async friendAdd(userId: string, friendId: string) {
+  async friendAdd(userId: string, friendInfo: AddFriendDto) {
     try {
-      const friend = await this.mongoService.imFriend.findFirstOrThrow({
+      const { friendId } = friendInfo
+      const friend = await this.mongoService.imFriend.findFirst({
         where: {
           userId,
           friendId,
@@ -87,16 +90,58 @@ export class ImUserFriendService {
       })
 
       if (friend) {
-        return Result.fail(ImErrorMsg.ImFrindHasExist)
+        return Result.fail(ImErrorMsg.ImFriendHasExist)
       }
 
-      await this.mongoService.imFriend.create({
+      await this.mongoService.imFriendApply.create({
         data: {
           userId,
           friendId,
-          id: ulid(),
+          expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          id: (new Snowflake(1, 1)).generateId(),
         },
       })
+
+      return Result.ok()
+    }
+    catch (error) {
+      return Result.fail(error)
+    }
+  }
+
+  async friendAddAdmit(userId: string, admitInfo: AdmitAddFriendDto) {
+    try {
+      const { status } = admitInfo
+      const applyInfo = await this.mongoService.imFriendApply.findUnique({
+        where: {
+          id: admitInfo.id,
+        },
+      })
+
+      if (!applyInfo || (userId !== applyInfo.friendId)) {
+        return Result.fail(ImErrorMsg.InvalidFriend)
+      }
+
+      if (status === 0) {
+        await this.mongoService.imFriend.create({
+          data: {
+            userId: applyInfo.userId,
+            friendId: applyInfo.friendId,
+            remark: applyInfo.remark,
+            id: (new Snowflake(1, 1)).generateId(),
+          },
+        })
+      }
+      else if (status === 1) {
+        await this.mongoService.imFriendApply.update({
+          where: {
+            id: admitInfo.id,
+          },
+          data: {
+            status: 2,
+          },
+        })
+      }
       return Result.ok()
     }
     catch (error) {

@@ -14,5 +14,6 @@
     ".vscode-insiders",
     "packages/mysql",
     "packages/mongo"
-  ]
+  ],
+  "cSpell.enabled": true
 }

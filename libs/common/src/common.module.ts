@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
+import NatsFactory from './factories/nats.factory'
 import RedisFactory from './factories/redis.factory'
 import { MongoService, MysqlService } from './services/prisma.service'
 import { customValidateEnv } from './utils/env'
@@ -35,7 +36,7 @@ import { customValidateEnv } from './utils/env'
 
     // , { provide: APP_GUARD, useClass: ThrottlerGuard }
   ],
-  providers: [MysqlService, MongoService, RedisFactory],
-  exports: [MysqlService, MongoService, RedisFactory],
+  providers: [MysqlService, MongoService, RedisFactory, NatsFactory],
+  exports: [MysqlService, MongoService, RedisFactory, NatsFactory],
 })
 export class CommonModule {}
