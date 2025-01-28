@@ -205,10 +205,10 @@ export class ImService {
         const notification = await this.mysqlService.notification.create({
           data: {
             notificationId: (new Snowflake(1, 1)).generateId(),
-            title: NotificationTitle.FriendAddAdmit,
+            title: `${1}${NotificationTitle.FriendAddAdmit}`,
             notificationType: NotificationType.APPLY_RESULT,
             toUserId: applyInfo.friendId,
-            fromUserId: applyInfo.userId,
+            from: applyInfo.userId,
           },
         })
 
@@ -274,7 +274,7 @@ export class ImService {
           title: NotificationTitle.FriendAdd,
           notificationType: NotificationType.APPLY,
           toUserId: friendId,
-          fromUserId: userId,
+          from: userId,
         },
       })
 

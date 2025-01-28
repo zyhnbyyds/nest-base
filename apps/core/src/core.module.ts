@@ -4,6 +4,7 @@ import { TasksService } from '@libs/common/services/task.service'
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
 import { ImModule } from './modules/im/im.module'
+import { NotificationModule } from './modules/notification/notification.module'
 import { UserModule } from './modules/user/user.module'
 
 @Module({
@@ -13,6 +14,7 @@ import { UserModule } from './modules/user/user.module'
     CommonModule,
     JwtModuleImport,
     ScheduleModule.forRoot(),
+    NotificationModule,
   ],
   providers: [TasksService],
 })

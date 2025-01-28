@@ -1,5 +1,5 @@
 export enum NotificationTitle {
-  FriendAdd = '好友申请',
+  FriendAdd = '向你发起了好友申请',
   FriendAddAdmit = '好友申请通过',
   FriendAddRefuse = '好友申请拒绝',
   FriendDelete = '好友删除',

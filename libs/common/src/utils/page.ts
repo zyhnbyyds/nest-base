@@ -14,3 +14,34 @@ export function transformPageToOrmQry(page: PageDto) {
     take,
   }
 }
+
+/**
+ * 把对象空值转为null
+ * @param target 目标对象
+ * @returns
+ */
+export function transformEmptyParamsToNull<T extends object>(target: object) {
+  return Object.keys(target).reduce((acc, key) => {
+    if (target[key] === '') {
+      acc[key] = null
+    }
+    else {
+      acc[key] = target[key]
+    }
+    return acc
+  }, {} as T)
+}
+
+/**
+ * 过滤空属性值
+ * @param target 目标对象
+ * @returns
+ */
+export function filterEmptyParams<T extends object>(target: object) {
+  return Object.keys(target).reduce((acc, key) => {
+    if (target[key] !== undefined && target[key] !== null && target[key] !== '') {
+      acc[key] = target[key]
+    }
+    return acc
+  }, {} as T)
+}

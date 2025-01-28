@@ -27,6 +27,8 @@ model User {
   password      String    @map("password") @db.VarChar(60)
   ip            String?   @map("ip")
   timeZone      String?   @map("time_zone")
+  notifications Notification[]
+
   @@map("user")
 }
 
@@ -59,13 +61,16 @@ enum NotificationType {
 model Notification {
   notificationId  String    @id @map("notification_id") @db.VarChar(20)
   notificationType NotificationType @map("notification_type")
-  fromUserId      String?   @map("from_user_id") @db.VarChar(20)
-  toUserId        String?   @map("to_user_id") @db.VarChar(20)
+  from            String    @map("from_user_id") @db.VarChar(20)
+  toUserId        String    @map("to_user_id") @db.VarChar(20)
+  toUser          User      @relation(fields: [toUserId], references: [userId])
   title           String    @map("title") @db.VarChar(20)
-  content         String?    @map("content") @db.VarChar(100)
+  content         String?   @map("content") @db.VarChar(100)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   isDelete        Boolean?  @default(false) @map("is_delete")
+  isRead          Boolean?  @default(false) @map("is_read")
+  isSystem        Boolean?  @default(false) @map("is_system")
 
   @@map("notification")
 }
