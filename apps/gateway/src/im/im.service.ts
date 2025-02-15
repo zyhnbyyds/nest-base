@@ -96,8 +96,10 @@ export class ImService {
       }
 
       let data = await this.mongoService.imUser.findUnique({ where: { userId } })
+      const user = await this.mysqlService.user.findUnique({ where: { userId } })
+
       if (!data) {
-        data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: '' } })
+        data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: user.userName } })
       }
 
       const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
@@ -243,6 +245,7 @@ export class ImService {
   async friendAdd(socket: Socket, friendInfo: AddFriendDto) {
     try {
       const userId = socket.handshake.auth.userId
+      const user = await this.mongoService.imUser.findUnique({ where: { userId } })
 
       const { friendId } = friendInfo
       const friend = await this.mongoService.imFriend.findFirst({
@@ -268,26 +271,28 @@ export class ImService {
       }
 
       const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${friendId}`)
-      const notification = await this.mysqlService.notification.create({
-        data: {
-          notificationId: (new Snowflake(1, 1)).generateId(),
-          title: NotificationTitle.FriendAdd,
-          notificationType: NotificationType.APPLY,
-          toUserId: friendId,
-          from: userId,
-        },
-      })
+
+      const [notification] = await this.mysqlService.$transaction([
+        this.mysqlService.notification.create({
+          data: {
+            notificationId: (new Snowflake(1, 1)).generateId(),
+            title: `${user.userName}${NotificationTitle.FriendAdd}`,
+            notificationType: NotificationType.APPLY,
+            toUserId: friendId,
+            from: userId,
+          },
+        }),
+        this.mongoService.imFriendApply.create({
+          data: {
+            userId,
+            friendId,
+            expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            id: (new Snowflake(1, 1)).generateId(),
+          },
+        }),
+      ])
 
       this.server.to(socketId).emit(SOCKET_EVENT.NOTIFICATION, notification)
-
-      await this.mongoService.imFriendApply.create({
-        data: {
-          userId,
-          friendId,
-          expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-          id: (new Snowflake(1, 1)).generateId(),
-        },
-      })
 
       return Result.ok()
     }

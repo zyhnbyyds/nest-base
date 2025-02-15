@@ -10,6 +10,8 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { WinstonModule } from 'nest-winston'
 import { NATS_TIMEOUT } from '../constant'
 import { SubAppPortEnum } from '../enums/subapps'
+import { LoggingInterceptor } from '../interceptors/Logger.interceptor'
+import { TimezoneInterceptor } from '../interceptors/TimeZone.interceptor'
 import { customValidateEnv } from './env'
 import { winstonLoggerOptions } from './logger'
 
@@ -36,7 +38,17 @@ export interface MicroBootstrapOptions {
  * @param options BootstrapOptions 启动配置
  */
 export async function bootstrap(options: BootstrapOptions) {
+  if (process.env.NODE_ENV === 'prod') {
+    process.env.TZ = 'UTC'
+  }
+
   const app = await NestFactory.create<NestFastifyApplication>(options.module, new FastifyAdapter())
+
+  if (process.env.IS_LOG_EVERY_REQ === 'Y') {
+    app.useGlobalInterceptors(new LoggingInterceptor())
+  }
+
+  app.useGlobalInterceptors(new TimezoneInterceptor())
 
   if (options.allExceptionsFilter)
     app.useGlobalFilters(new AllExceptionsFilter())

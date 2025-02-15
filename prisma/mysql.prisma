@@ -12,7 +12,7 @@ model User {
   userId        String    @id @map("user_id") @db.VarChar(20)
   openId        String    @unique @map("open_id") @db.VarChar(20)
   nickname      String    @map("nickname") @db.VarChar(20)
-  userName      String?   @map("user_name") @db.VarChar(20)
+  userName      String   @map("user_name") @db.VarChar(20)
   avatarUrl     String    @map("avatar_url") @db.VarChar(100)
   gender        String    @map("gender") @db.Char(6)
   language      String    @default("zh_CN") @map("language")

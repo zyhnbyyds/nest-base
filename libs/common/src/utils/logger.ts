@@ -1,8 +1,9 @@
+import type { LoggerOptions } from 'winston'
 import { pid } from 'node:process'
-import { addColors, format, type LoggerOptions, transports } from 'winston'
+import { addColors, format, transports } from 'winston'
 import DailyRotateFile from 'winston-daily-rotate-file'
 import { ElasticsearchTransport } from 'winston-elasticsearch'
-import { YYYYMMDDHHmmss } from './moment'
+import { YYYYMMDDHHmmss } from './time'
 
 export interface LogExtraMsg {
   message: string
@@ -30,7 +31,7 @@ export const winstonLoggerOptions: LoggerOptions = {
     splat(),
     prettyPrint(),
     printf(({ level, message, timestamp, label }) => {
-      return `[${label}] ${pid}  - ${YYYYMMDDHHmmss(timestamp as string)}     ${level} ${message}`
+      return `[${label}] ${pid} - ${YYYYMMDDHHmmss(timestamp as string)} ${process.env.TZ ?? ''}     ${level} ${message}`
     }),
   ),
 
