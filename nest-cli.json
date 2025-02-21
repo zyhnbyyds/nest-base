@@ -11,24 +11,6 @@
   "monorepo": true,
   "root": "apps/core",
   "projects": {
-    "core": {
-      "type": "application",
-      "root": "apps/core",
-      "entryFile": "main",
-      "sourceRoot": "apps/core/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/core/tsconfig.app.json"
-      }
-    },
-    "gateway": {
-      "type": "application",
-      "root": "apps/gateway",
-      "entryFile": "main",
-      "sourceRoot": "apps/gateway/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/gateway/tsconfig.app.json"
-      }
-    },
     "auth": {
       "type": "application",
       "root": "apps/auth",
@@ -48,6 +30,15 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
+    "core": {
+      "type": "application",
+      "root": "apps/core",
+      "entryFile": "main",
+      "sourceRoot": "apps/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/core/tsconfig.app.json"
+      }
+    },
     "email": {
       "type": "application",
       "root": "apps/email",
@@ -55,6 +46,24 @@
       "sourceRoot": "apps/email/src",
       "compilerOptions": {
         "tsConfigPath": "apps/email/tsconfig.app.json"
+      }
+    },
+    "gateway": {
+      "type": "application",
+      "root": "apps/gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+      }
+    },
+    "task": {
+      "type": "library",
+      "root": "libs/task",
+      "entryFile": "index",
+      "sourceRoot": "libs/task/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/task/tsconfig.lib.json"
       }
     }
   }

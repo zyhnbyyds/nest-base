@@ -13,6 +13,12 @@
       ],
       "@libs/common/*": [
         "libs/common/src/*"
+      ],
+      "@task/task": [
+        "libs/task/src"
+      ],
+      "@task/task/*": [
+        "libs/task/src/*"
       ]
     },
     "allowJs": false,

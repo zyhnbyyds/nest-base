@@ -137,7 +137,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@libs/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+      "^@libs/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^@task/task(|/.*)$": "<rootDir>/libs/task/src/$1"
     }
   }
 }
