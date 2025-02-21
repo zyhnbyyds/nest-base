@@ -31,5 +31,9 @@ declare namespace Middle {
     NATS_SERVER_URL: string
     NATS_AUTH_USER: string
     NATS_AUTH_PASSWORD: string
+
+    // Ai
+    ALI_DEEPDEEK_APP_KEY: string
+    ALI_DEEPSEEK_APP_BASE_URL: string
   }
 }

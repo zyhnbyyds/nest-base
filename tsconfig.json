@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "ES2021",
+    "target": "ESNext",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "baseUrl": "./",
-    "module": "CommonJS",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "paths": {
       "@libs/common": [
         "libs/common/src"

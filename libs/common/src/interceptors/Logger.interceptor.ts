@@ -1,11 +1,10 @@
 import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common'
 import { FastifyRequest } from 'fastify'
-import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler) {
     const request = context.switchToHttp().getRequest<FastifyRequest>()
 
     const before = Date.now()
@@ -16,6 +15,8 @@ export class LoggingInterceptor implements NestInterceptor {
           const response = context.switchToHttp().getResponse()
 
           const payload = {
+            class: context.getClass().name,
+            handler: context.getHandler().name,
             method: request.method,
             url: request.url,
             headers: request.headers,

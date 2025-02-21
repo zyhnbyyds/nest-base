@@ -1,8 +1,10 @@
 import { FastifyRequest } from 'fastify'
 
 export interface FastifyRequestWithAuth extends FastifyRequest {
-  verify: {
-    userId: string
-    email: string
-  }
+  verify: TUserVerify
+}
+
+export interface TUserVerify {
+  userId: string
+  email: string
 }

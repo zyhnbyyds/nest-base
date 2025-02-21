@@ -2,11 +2,11 @@ import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 
-type Function = (...args: any[]) => any
+type Function = (...args: unknown[]) => unknown
 
 @Injectable()
-export class ValidationPipe implements PipeTransform<any> {
-  async transform(value: any, { metatype }: ArgumentMetadata) {
+export class ValidationPipe implements PipeTransform<unknown> {
+  async transform(value: unknown, { metatype }: ArgumentMetadata) {
     if (!metatype || !this.toValidate(metatype as any)) {
       return value
     }

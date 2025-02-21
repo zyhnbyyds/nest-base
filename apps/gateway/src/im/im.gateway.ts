@@ -1,9 +1,13 @@
 import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKET_PING_TIMEOUT } from '@libs/common/constant'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
+import { FactoryName } from '@libs/common/enums/factory'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
+import { Inject, Logger } from '@nestjs/common'
+import { MessagePattern, Payload } from '@nestjs/microservices'
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { instrument } from '@socket.io/admin-ui'
+import { NatsConnection } from 'nats'
 import { Namespace, Server, Socket } from 'socket.io'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { AddFriendDto, AdmitAddFriendDto } from './dto/friend.dto'
@@ -25,7 +29,20 @@ export class ImGateway {
 
   constructor(
     private readonly wsService: ImService,
+    @Inject(FactoryName.NatsFactory)
+    private nats: NatsConnection,
   ) {
+    this.nats.subscribe('deepseek.chat.completions', {
+      callback: (err, msg) => {
+        if (err) {
+          Logger.error(err)
+        }
+        if (msg) {
+          Logger.log(msg.data.toString())
+          this.server.send(msg.data.toString())
+        }
+      },
+    })
   }
 
   afterInit(namespace: Namespace) {
@@ -34,6 +51,11 @@ export class ImGateway {
     namespace.on(SOCKET_EVENT.CONNECTION, async (socket: Socket) => {
       this.wsService.afterSeverConnection(socket, namespace)
     })
+  }
+
+  @MessagePattern('deepseek.chat.completions')
+  deepSeekReceive(@Payload() data: any) {
+    Logger.log('deepSeekReceive', data)
   }
 
   @SubscribeMessage(SOCKET_EVENT.SEND_MESSAGE)

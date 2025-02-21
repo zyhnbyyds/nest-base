@@ -7,4 +7,6 @@ export enum FactoryName {
   TransportFactory = 'transport_factory',
   /** nats 工厂 */
   NatsFactory = 'nats_factory',
+  /** deepseek 工厂 */
+  DeepSeekFactory = 'deepseek_factory',
 }

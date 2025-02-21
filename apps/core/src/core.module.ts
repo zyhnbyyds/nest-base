@@ -1,5 +1,6 @@
 import { CommonModule } from '@libs/common'
 import { JwtModuleImport } from '@libs/common/config/module-register'
+import DeepSeekFactory from '@libs/common/factories/deepseek.factory'
 import { TimeZoneMiddleware } from '@libs/common/middlewares/timezone.middleware'
 import { TasksService } from '@libs/common/services/task.service'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
@@ -17,7 +18,8 @@ import { UserModule } from './modules/user/user.module'
     ScheduleModule.forRoot(),
     NotificationModule,
   ],
-  providers: [TasksService],
+  providers: [TasksService, DeepSeekFactory],
+  exports: [DeepSeekFactory],
 })
 export class CoreModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

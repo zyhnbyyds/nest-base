@@ -1,5 +1,6 @@
-import { FastifyRequestWithAuth } from '@libs/common/types/interface'
-import { Controller, Delete, Get, Param, Query, Req } from '@nestjs/common'
+import { UserVerify } from '@libs/common/custom-decorators/UserVerify.decorator'
+import { TUserVerify } from '@libs/common/types/interface'
+import { Controller, Delete, Get, Param, Query } from '@nestjs/common'
 import { GetNotificationListDto } from './dto/notification.dto'
 import { NotificationService } from './notification.service'
 
@@ -8,8 +9,8 @@ export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get('/list')
-  findAll(@Query() query: GetNotificationListDto, @Req() req: FastifyRequestWithAuth) {
-    return this.notificationService.findAll(query, req.verify.userId)
+  findAll(@Query() query: GetNotificationListDto, @UserVerify() verify: TUserVerify) {
+    return this.notificationService.findAll(query, verify.userId)
   }
 
   @Delete('/del')
