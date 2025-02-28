@@ -11,9 +11,25 @@ services:
       MYSQL_PASSWORD: yujiezhang187332
       MYSQL_DATABASE: nestjs_db
     ports:
-      - "3306:3306"
+      - "3309:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - net-backend
+
+  # NATS 服务
+  nats:
+    image: nats:latest
+    container_name: nats
+    volumes:
+      - ./nats.conf:/etc/nats/nats.conf
+    command: ["-c", "/etc/nats/nats.conf"]
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - net-backend
 
   # Redis 服务
   redis:
@@ -21,7 +37,9 @@ services:
     container_name: redis
     command: redis-server --requirepass yujiezhang187332
     ports:
-      - "6379:6379"
+      - "6389:6379"
+    networks:
+      - net-backend
 
   # MongoDB 服务
   mongo:
@@ -31,9 +49,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: nest-timer
       MONGO_INITDB_ROOT_PASSWORD: yujiezhang187332
     ports:
-      - "27017:27017"
+      - "27019:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - net-backend
 
   # NestJS 应用服务
   nestjs:
@@ -45,7 +65,6 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: yujiezhang187332
-      MONGO_URI: mongodb://nest-timer:yujiezhang187332@mongo:27017/nestjs_db
       REDIS_DB: 0
       JWT_SECRET: jwtsecret
       JWT_EXPIRES_IN: 1h
@@ -55,6 +74,9 @@ services:
       DB_USERNAME: nest-timer
       DB_PASSWORD: yujiezhang187332
       DB_DATABASE: nestjs_db
+      DATABASE_MONGO_URL: mongodb://nest-timer:yujiezhang187332@mongo/nestjs_db
+      DATABASE_URL: mysql://nest-timer:yujiezhang187332@mysql/nestjs_db
+      DATABASE_HOST: mysql
 
       EMAIL_HOST: smtp.163.com
       EMAIL_PORT: 465
@@ -62,7 +84,7 @@ services:
       EMAIL_PASSWORD: KZzjT7VQgmRYrFJ
       EMAIL_FROM: "My Name <myemail@example.com>"
 
-      NATS_SERVER_URL: nats://localhost:4222
+      NATS_SERVER_URL: nats://nats:4222
       NATS_AUTH_USER: nat_user
       NATS_AUTH_PASSWORD: nat_passwordS
 
@@ -85,7 +107,14 @@ services:
       - mysql
       - redis
       - mongo
+      - nats
+    networks:
+      - net-backend
 
 volumes:
   mysql_data:
   mongodb_data:
+
+networks:
+  net-backend:
+    driver: bridge

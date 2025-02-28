@@ -6,12 +6,12 @@ import { customValidateEnv } from '../utils/env'
 const RedisFactory: Provider = {
   provide: FactoryName.RedisFactory,
   useFactory: () => {
-    const { REDIS_PORT, REDIS_HOST } = customValidateEnv(process.env)
+    const { REDIS_PORT, REDIS_HOST, REDIS_PASSWORD } = customValidateEnv(process.env)
 
     return new Redis({
       port: REDIS_PORT,
       host: REDIS_HOST,
-      // TODO: 配置权限
+      password: REDIS_PASSWORD,
     })
   },
 }
