@@ -11,4 +11,5 @@ RUN pnpm db:init
 
 RUN pnpm build:all
 
-CMD ["pm2", "ecosystem.config.js"]
+CMD ["pm2", "start", "ecosystem.config.js"]
+
