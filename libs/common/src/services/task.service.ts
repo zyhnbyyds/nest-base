@@ -13,13 +13,14 @@ export class TasksService {
     private nats: NatsConnection,
   ) {}
 
-  @Cron('10 * * * *')
+  @Cron('16 * * * *')
   async handleCron() {
     const start = Date.now()
     try {
       const completion = await this.deepSeek.chat.completions.create({
-        model: 'deepseek-r1',
+        model: 'deepseek-reasoner',
         messages: [
+          { role: 'system', content: '新闻评论员，每个回答需要标明日期，并起一个符合的标题' },
           { role: 'user', content: '总结今日的大事件' },
         ],
       })

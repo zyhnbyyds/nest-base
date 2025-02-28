@@ -53,9 +53,9 @@ export class Snowflake {
 
     const id: bigint
       = (BigInt(timestamp) << BigInt(this.timestampLeftShift))
-      | (BigInt(this.datacenterId) << BigInt(this.datacenterIdShift))
-      | (BigInt(this.workerId) << BigInt(this.workerIdShift))
-      | BigInt(this.sequence)
+        | (BigInt(this.datacenterId) << BigInt(this.datacenterIdShift))
+        | (BigInt(this.workerId) << BigInt(this.workerIdShift))
+        | BigInt(this.sequence)
 
     return id.toString()
   }

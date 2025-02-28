@@ -1,7 +1,6 @@
-/* eslint-disable no-console */
-/* eslint-disable unicorn/prefer-node-protocol */
-import * as fs from 'fs'
-import * as path from 'path'
+/* eslint-disable ts/no-require-imports */
+const fs = require('node:fs')
+const path = require('node:path')
 
 async function getPackageVersion(packageName: string): Promise<string | null> {
   try {

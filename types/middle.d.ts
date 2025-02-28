@@ -32,8 +32,12 @@ declare namespace Middle {
     NATS_AUTH_USER: string
     NATS_AUTH_PASSWORD: string
 
-    // Ai
+    // Ali deepseek Ai
     ALI_DEEPDEEK_APP_KEY: string
     ALI_DEEPSEEK_APP_BASE_URL: string
+
+    // DeepSeek ai
+    DEEP_SEEK_APP_KEY: string
+    DEEP_SEEK_APP_BASE_URL: string
   }
 }

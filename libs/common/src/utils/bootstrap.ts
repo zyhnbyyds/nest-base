@@ -44,6 +44,11 @@ export async function bootstrap(options: BootstrapOptions) {
 
   const app = await NestFactory.create<NestFastifyApplication>(options.module, new FastifyAdapter())
 
+  // eslint-disable-next-line style/max-statements-per-line
+  app.getHttpAdapter().getInstance().decorateReply('setHeader', function (key, value) { this.raw.setHeader(key, value) })
+  // eslint-disable-next-line style/max-statements-per-line
+  app.getHttpAdapter().getInstance().decorateReply('end', function () { this.raw.end() })
+
   if (process.env.IS_LOG_EVERY_REQ === 'Y') {
     app.useGlobalInterceptors(new LoggingInterceptor())
   }
@@ -70,6 +75,8 @@ export async function bootstrap(options: BootstrapOptions) {
     await app.register(compression)
 
   app.useLogger(WinstonModule.createLogger(winstonLoggerOptions))
+
+  app.enableCors()
 
   await app.listen({
     port: options.port,

@@ -12,6 +12,11 @@ export class CreateUserDtoWithoutEmail {
   @MaxLength(32)
   nickname: string
 
+  @IsString()
+  @MinLength(1)
+  @MaxLength(32)
+  userName: string
+
   @IsUrl()
   @Transform(({ value }) => value.trim())
   avatarUrl: string

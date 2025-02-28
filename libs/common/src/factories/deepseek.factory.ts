@@ -6,8 +6,8 @@ const DeepSeekFactory: Provider = {
   provide: FactoryName.DeepSeekFactory,
   useFactory: () => {
     const deepSeek = new OpenApi({
-      apiKey: process.env.ALI_DEEPDEEK_APP_KEY,
-      baseURL: process.env.ALI_DEEPSEEK_APP_BASE_URL,
+      apiKey: process.env.DEEP_SEEK_APP_KEY,
+      baseURL: process.env.DEEP_SEEK_APP_BASE_URL,
     })
     return deepSeek
   },
