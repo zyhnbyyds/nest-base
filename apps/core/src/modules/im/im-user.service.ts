@@ -1,7 +1,7 @@
 import { FactoryName } from '@libs/common/enums/factory'
 import { ImUserStatusEnum } from '@libs/common/enums/im'
 import { RedisCacheKey } from '@libs/common/enums/redis'
-import { MongoService } from '@libs/common/services/prisma.service'
+import { PrismaService } from '@libs/common/services/prisma.service'
 import { transformPageToOrmQry } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Inject, Injectable } from '@nestjs/common'
@@ -12,8 +12,7 @@ import { GetImUserListDto } from './dto/get-im-user.dto'
 @Injectable()
 export class ImUserService {
   constructor(
-    private prisma: MongoService,
-
+    private db: PrismaService,
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
   ) {}
@@ -26,7 +25,7 @@ export class ImUserService {
   }
 
   async logout(userId: string) {
-    await this.prisma.imUser.update({ where: { userId }, data: { status: 1, lastActiveAt: new Date() } })
+    await this.db.imUser.update({ where: { userId }, data: { status: 1, lastActiveAt: new Date() } })
 
     await this.redis.del(`${RedisCacheKey.SocketId}${userId}`)
 
@@ -34,14 +33,14 @@ export class ImUserService {
   }
 
   async create(createImUserDto: CreateImUserDto) {
-    const imUser = await this.prisma.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName: '' } })
+    const imUser = await this.db.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName: '' } })
     return Result.success(imUser)
   }
 
   async findAll(query: GetImUserListDto) {
     try {
-      const list = await this.prisma.imUser.findMany({ ...transformPageToOrmQry(query) })
-      const total = await this.prisma.imUser.count()
+      const list = await this.db.imUser.findMany({ ...transformPageToOrmQry(query) })
+      const total = await this.db.imUser.count()
       return Result.list(list, total)
     }
     catch (error) {
@@ -50,7 +49,7 @@ export class ImUserService {
   }
 
   async findOne(userId: string) {
-    const imUser = await this.prisma.imUser.findUnique({ where: { userId } })
+    const imUser = await this.db.imUser.findUnique({ where: { userId } })
     return Result.success(imUser)
   }
 

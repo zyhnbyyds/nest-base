@@ -1,12 +1,3 @@
-generator client {
-  provider = "prisma-client-js"
-  output   = "../packages/mongo"
-}
-
-datasource mongodb {
-  provider = "mongodb"
-  url      = env("DATABASE_MONGO_URL")
-}
 
 model ImUser {
   userId       String    @id @map("_id")
@@ -15,8 +6,6 @@ model ImUser {
   updatedAt    DateTime  @updatedAt
   userName     String    @map("user_name")
   isDelete     Boolean?  @default(false)
-  ImGroupIds   String[]  @map("group_ids")
-  ImGroups     ImGroup[] @relation(fields: [ImGroupIds], references: [groupId])
   lastActiveAt DateTime  @default(now())
 
   @@map("im_user")
@@ -29,8 +18,6 @@ model ImGroup {
   description String?  @map("description")
   createdBy   String   @map("created_by")
   masterId    String   @map("master_id")
-  slaveIds    String[] @map("slave_ids")
-  slaves      ImUser[] @relation(fields: [slaveIds], references: [userId])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isDelete    Boolean? @default(false)
@@ -39,12 +26,12 @@ model ImGroup {
 }
 
 model ImMessage {
-  id         String   @id @default(auto()) @map("_id") @mongodb.ObjectId
+  id         String   @id  @db.VarChar(20)
   messageId  String   @unique @map("message_id")
   fromUserId String   @map("from_user_id")
   toUserId   String?  @map("to_user_id")
   toGroupId  String?  @map("to_group_id")
-  content    String   @map("content") @mongodb.String
+  content    String   @map("content")
   type       Int?     @default(0)
   status     Int?     @default(0)
   createdAt  DateTime @default(now())

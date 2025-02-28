@@ -1,24 +1,22 @@
 import { ImMessageStatusEnum } from '@libs/common/enums/im'
-import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
+import { PrismaService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable } from '@nestjs/common'
-import { ImFriend } from 'packages/mongo'
-import { User } from 'packages/mysql'
-import { ulid } from 'ulid'
+import { ImFriend, User } from '@prisma/client'
 import { ImErrorMsg } from './config/error'
 import { AddFriendDto, AdmitAddFriendDto } from './dto/add-friend.dto'
 
 @Injectable()
 export class ImUserFriendService {
-  constructor(private mongoService: MongoService, private mysqlService: MysqlService) {}
+  constructor(private db: PrismaService) {}
 
   async friendList(userId: string) {
-    const friends = await this.mongoService.imFriend.findMany({ where: { userId } })
+    const friends = await this.db.imFriend.findMany({ where: { userId } })
     const friendIds = friends.map(friend => friend.friendId)
 
     const friendIdToUserMap = new Map<string, User>()
-    const friendUserInfoList = await this.mysqlService.user.findMany({ where: { userId: { in: friendIds } } })
+    const friendUserInfoList = await this.db.user.findMany({ where: { userId: { in: friendIds } } })
 
     friendUserInfoList.forEach((item) => {
       friendIdToUserMap.set(item.userId, item)
@@ -38,7 +36,7 @@ export class ImUserFriendService {
     const unreadCountMap = new Map<string, number>()
     const friendIdToUserMap = new Map<string, User>()
 
-    const friendList = await this.mongoService.imFriend.findMany({
+    const friendList = await this.db.imFriend.findMany({
       where: { userId },
     })
 
@@ -48,7 +46,7 @@ export class ImUserFriendService {
       return Result.success([])
     }
 
-    const unreadCounts = await this.mongoService.imMessage.groupBy({
+    const unreadCounts = await this.db.imMessage.groupBy({
       by: ['fromUserId'],
       where: {
         fromUserId: { in: friendIds },
@@ -62,7 +60,7 @@ export class ImUserFriendService {
       unreadCountMap.set(item.fromUserId, item._count.fromUserId)
     })
 
-    const friendUserInfoList = await this.mysqlService.user.findMany({ where: { userId: { in: friendIds } } })
+    const friendUserInfoList = await this.db.user.findMany({ where: { userId: { in: friendIds } } })
 
     friendUserInfoList.forEach((item) => {
       friendIdToUserMap.set(item.userId, item)
@@ -82,7 +80,7 @@ export class ImUserFriendService {
   async friendAdd(userId: string, friendInfo: AddFriendDto) {
     try {
       const { friendId } = friendInfo
-      const friend = await this.mongoService.imFriend.findFirst({
+      const friend = await this.db.imFriend.findFirst({
         where: {
           userId,
           friendId,
@@ -93,7 +91,7 @@ export class ImUserFriendService {
         return Result.fail(ImErrorMsg.ImFriendHasExist)
       }
 
-      await this.mongoService.imFriendApply.create({
+      await this.db.imFriendApply.create({
         data: {
           userId,
           friendId,
@@ -112,7 +110,7 @@ export class ImUserFriendService {
   async friendAddAdmit(userId: string, admitInfo: AdmitAddFriendDto) {
     try {
       const { status } = admitInfo
-      const applyInfo = await this.mongoService.imFriendApply.findUnique({
+      const applyInfo = await this.db.imFriendApply.findUnique({
         where: {
           id: admitInfo.id,
         },
@@ -123,7 +121,7 @@ export class ImUserFriendService {
       }
 
       if (status === 0) {
-        await this.mongoService.imFriend.create({
+        await this.db.imFriend.create({
           data: {
             userId: applyInfo.userId,
             friendId: applyInfo.friendId,
@@ -133,7 +131,7 @@ export class ImUserFriendService {
         })
       }
       else if (status === 1) {
-        await this.mongoService.imFriendApply.update({
+        await this.db.imFriendApply.update({
           where: {
             id: admitInfo.id,
           },
@@ -151,7 +149,7 @@ export class ImUserFriendService {
 
   async friendDelete(id: string) {
     try {
-      await this.mongoService.imFriend.delete({
+      await this.db.imFriend.delete({
         where: {
           id,
         },
@@ -164,7 +162,7 @@ export class ImUserFriendService {
 
   async friendUpdate(id: string, friendInfo: ImFriend) {
     try {
-      await this.mongoService.imFriend.update({
+      await this.db.imFriend.update({
         where: {
           id,
         },
@@ -178,7 +176,7 @@ export class ImUserFriendService {
 
   async friendSearch(searchVal: string) {
     try {
-      await this.mongoService.imFriend.findMany({
+      await this.db.imFriend.findMany({
         where: {
           OR: [
             {

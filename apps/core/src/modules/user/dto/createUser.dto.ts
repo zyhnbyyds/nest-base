@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer'
-import { IsEmail, IsEnum, IsOptional, IsString, IsUrl, Length, MaxLength, MinLength } from 'class-validator'
+import { IsEmail, IsEnum, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator'
 
 export class CreateUserDtoWithoutEmail {
   @IsString({ message: '密码长度在6-32位' })

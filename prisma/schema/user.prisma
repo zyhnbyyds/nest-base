@@ -1,12 +1,3 @@
-generator client {
-  provider = "prisma-client-js"
-  output = "../packages/mysql"
-}
-
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
 
 model User {
   userId        String    @id @map("user_id") @db.VarChar(20)
@@ -29,6 +20,7 @@ model User {
   timeZone      String?   @map("time_zone")
   notifications Notification[]
 
+  
   @@map("user")
 }
 

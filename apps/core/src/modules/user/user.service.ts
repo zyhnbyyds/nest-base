@@ -1,22 +1,22 @@
 import { UserErrorMsg } from '@libs/common/enums/error'
-import { MysqlService } from '@libs/common/services/prisma.service'
+import { PrismaService } from '@libs/common/services/prisma.service'
 import { transformPageToOrmQry } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Injectable, Logger } from '@nestjs/common'
-import { User } from '@zgyh/prisma-mysql'
+import { User } from '@prisma/client'
 import { omit } from 'lodash'
 import { CreateUserDto, CreateUserDtoWithoutEmail } from './dto/createUser.dto'
 import { GetUserListDto } from './dto/get-user-list-dto'
 
 @Injectable()
 export class UserService {
-  constructor(private mysqlService: MysqlService) {}
+  constructor(private db: PrismaService) {}
 
   async create(createUserDto: CreateUserDto, userId: string = '') {
     const snowflake = new Snowflake(1, 1)
 
-    const resCreateInfo = await this.mysqlService.user.create({ data: {
+    const resCreateInfo = await this.db.user.create({ data: {
       ...createUserDto,
       userId: userId || snowflake.generateId(),
       lastLoginTime: null,
@@ -31,8 +31,8 @@ export class UserService {
     try {
       const queryExcludePage = omit(query, ['current', 'size'])
 
-      const userList = await this.mysqlService.user.findMany({ where: { ...queryExcludePage }, ...transformPageToOrmQry(query) })
-      const total = await this.mysqlService.user.count({ where: { ...queryExcludePage } })
+      const userList = await this.db.user.findMany({ where: { ...queryExcludePage }, ...transformPageToOrmQry(query) })
+      const total = await this.db.user.count({ where: { ...queryExcludePage } })
       return Result.list(userList, total)
     }
     catch (error) {
@@ -42,8 +42,8 @@ export class UserService {
   }
 
   async findOne(userId: string) {
-    const user = await this.mysqlService.user.findUnique({ where: { userId } })
-    const registerUser = await this.mysqlService.registerUser.findUnique({ where: { userId } })
+    const user = await this.db.user.findUnique({ where: { userId } })
+    const registerUser = await this.db.registerUser.findUnique({ where: { userId } })
 
     if (!user && !registerUser) {
       return Result.fail(UserErrorMsg.UserNotFound)
@@ -55,11 +55,11 @@ export class UserService {
   }
 
   update(userId: string, updateUserDto: User) {
-    return this.mysqlService.user.update({ data: updateUserDto, where: { userId } })
+    return this.db.user.update({ data: updateUserDto, where: { userId } })
   }
 
   remove(userId: string) {
-    return this.mysqlService.user.delete({ where: { userId } })
+    return this.db.user.delete({ where: { userId } })
   }
 
   async createUserFromRegisterUser(user: CreateUserDtoWithoutEmail, verify: {

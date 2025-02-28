@@ -9,13 +9,12 @@ import { SOCKET_EVENT } from '../constant/socket-event'
 import { FactoryName } from '../enums/factory'
 import { ImUserStatusEnum } from '../enums/im'
 import { RedisCacheKey } from '../enums/redis'
-import { MongoService } from '../services/prisma.service'
+import { PrismaService } from '../services/prisma.service'
 
 export class SocketAfterSeverConnection {
   constructor(
-    private mongoService: MongoService,
     private jwtService: JwtService,
-
+    private db: PrismaService,
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
 
@@ -58,12 +57,12 @@ export class SocketAfterSeverConnection {
     socket.emit(SOCKET_EVENT.READY)
 
     socket.on(SOCKET_EVENT.DISCONNECT, async () => {
-      const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId } })
+      const imUserInfo = await this.db.imUser.findUnique({ where: { userId } })
       if (!imUserInfo) {
-        await this.mongoService.imUser.create({ data: { status: ImUserStatusEnum.OFFLINE, userName: '', userId } })
+        await this.db.imUser.create({ data: { status: ImUserStatusEnum.OFFLINE, userName: '', userId } })
       }
       else {
-        await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId } })
+        await this.db.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId } })
       }
       this.redis.del(`${RedisCacheKey.SocketId}${userId}`)
     })

@@ -6,9 +6,6 @@
   "description": "",
   "author": "",
   "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "build:core": "cross-env NODE_ENV=prod nest build core",
     "build:gateway": "cross-env NODE_ENV=prod nest build gateway",
@@ -21,7 +18,7 @@
     "dev:email": "cross-env NODE_ENV=dev nest start email -w",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "db:init": "prisma generate --schema ./prisma/mongo.prisma && prisma generate --schema ./prisma/mysql.prisma && ts-node prisma/change-package-name",
+    "db:init": "prisma generate && prisma db push",
     "db:dev": "prisma migrate dev --schema ./prisma/mysql.prisma && prisma db push --schema ./prisma/mongo.prisma && ts-node prisma/change-package-name.mjs && pnpm changeset version",
     "compodoc": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 -s --language zh-CN",
     "compodoc:init": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 --language zh-CN",
@@ -59,8 +56,6 @@
     "@nestjs/websockets": "^11.0.10",
     "@prisma/client": "^6.4.1",
     "@socket.io/admin-ui": "^0.5.1",
-    "@zgyh/prisma-mongo": "workspace:*",
-    "@zgyh/prisma-mysql": "workspace:*",
     "bullmq": "^5.41.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

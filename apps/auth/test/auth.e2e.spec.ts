@@ -1,7 +1,7 @@
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { testBootstrap } from '@libs/common/utils/bootstrap'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { PrismaClient } from '@zgyh/prisma-mysql'
+import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 import { AuthModule } from '../src/auth.module'
 

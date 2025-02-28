@@ -4,17 +4,17 @@ import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
 import { NotificationTitle } from '@libs/common/enums/notification'
 import { RedisCacheKey } from '@libs/common/enums/redis'
-import { MongoService, MysqlService } from '@libs/common/services/prisma.service'
+import { PrismaService } from '@libs/common/services/prisma.service'
 import { Result } from '@libs/common/utils/result'
 import { Snowflake } from '@libs/common/utils/snow-flake'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { NotificationType } from '@prisma/client'
 import { ImErrorMsg } from 'apps/core/src/modules/im/config/error'
 import { format } from 'date-fns'
 import Redis from 'ioredis'
 import ms, { StringValue } from 'ms'
-import { NotificationType } from 'packages/mysql'
 import { Namespace, Socket } from 'socket.io'
 import { ulid } from 'ulid'
 import { CreateRoomDto } from './dto/create-room.dto'
@@ -25,9 +25,9 @@ import { SendMessageDto } from './dto/send-message.dto'
 export class ImService {
   private server: Namespace
   constructor(
-    private mongoService: MongoService,
+
     private jwtService: JwtService,
-    private mysqlService: MysqlService,
+    private db: PrismaService,
 
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
@@ -46,7 +46,7 @@ export class ImService {
 
     const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${data.toUser}`)
 
-    const fromUserInfo = await this.mysqlService.user.findUnique({ where: { userId } })
+    const fromUserInfo = await this.db.user.findUnique({ where: { userId } })
 
     const messageInfo = {
       content: data.content,
@@ -55,8 +55,9 @@ export class ImService {
       messageType: data.messageType,
     }
 
-    await this.mongoService.imMessage.create({
+    await this.db.imMessage.create({
       data: {
+        id: (new Snowflake(1, 1)).generateId(),
         messageId: ulid(),
         content: data.content,
         fromUserId: userId,
@@ -74,7 +75,7 @@ export class ImService {
   async readMessage(socket: Socket, data: { friendId: string }) {
     const userId = socket.handshake.auth.userId
 
-    await this.mongoService.imMessage.updateMany({
+    await this.db.imMessage.updateMany({
       data: {
         status: ImMessageStatusEnum.READ,
       },
@@ -95,14 +96,14 @@ export class ImService {
         return Result.fail()
       }
 
-      let data = await this.mongoService.imUser.findUnique({ where: { userId } })
-      const user = await this.mysqlService.user.findUnique({ where: { userId } })
+      let data = await this.db.imUser.findUnique({ where: { userId } })
+      const user = await this.db.user.findUnique({ where: { userId } })
 
       if (!data) {
-        data = await this.mongoService.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: user.userName } })
+        data = await this.db.imUser.create({ data: { userId, status: ImUserStatusEnum.ONLINE, userName: user.userName } })
       }
 
-      const updateInfo = await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
+      const updateInfo = await this.db.imUser.update({ data: { status: ImUserStatusEnum.ONLINE }, where: { userId: data.userId } })
       await this.redis.set(`${RedisCacheKey.SocketId}${userId}`, socket.id)
 
       return Result.success(updateInfo)
@@ -150,12 +151,12 @@ export class ImService {
     socket.emit(SOCKET_EVENT.READY)
 
     socket.on(SOCKET_EVENT.DISCONNECT, async () => {
-      const imUserInfo = await this.mongoService.imUser.findUnique({ where: { userId } })
+      const imUserInfo = await this.db.imUser.findUnique({ where: { userId } })
       if (!imUserInfo) {
-        await this.mongoService.imUser.create({ data: { status: ImUserStatusEnum.OFFLINE, userName: '', userId } })
+        await this.db.imUser.create({ data: { status: ImUserStatusEnum.OFFLINE, userName: '', userId } })
       }
       else {
-        await this.mongoService.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId } })
+        await this.db.imUser.update({ data: { status: ImUserStatusEnum.OFFLINE }, where: { userId } })
       }
       this.redis.del(`${RedisCacheKey.SocketId}${userId}`)
     })
@@ -163,7 +164,7 @@ export class ImService {
 
   async createRoom(socket: Socket, body: CreateRoomDto) {
     const { userId } = socket.handshake.auth
-    const res = await this.mongoService.imGroup.create({
+    const res = await this.db.imGroup.create({
       data: {
         ...body,
         createdBy: userId,
@@ -179,14 +180,12 @@ export class ImService {
 
   /**
    * 处理好友申请
-   * @param admitInfo
-   * @returns
    */
   async friendAddAdmit(socket: Socket, admitInfo: AdmitAddFriendDto) {
     const userId = socket.handshake.auth.userId
     try {
       const { status } = admitInfo
-      const applyInfo = await this.mongoService.imFriendApply.findUnique({
+      const applyInfo = await this.db.imFriendApply.findUnique({
         where: {
           id: admitInfo.id,
         },
@@ -204,7 +203,7 @@ export class ImService {
       if (status === 0) {
         const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${applyInfo.friendId}`)
 
-        const notification = await this.mysqlService.notification.create({
+        const notification = await this.db.notification.create({
           data: {
             notificationId: (new Snowflake(1, 1)).generateId(),
             title: `${1}${NotificationTitle.FriendAddAdmit}`,
@@ -216,7 +215,7 @@ export class ImService {
 
         this.server.to(socketId).emit(SOCKET_EVENT.NOTIFICATION, notification)
 
-        await this.mongoService.imFriend.create({
+        await this.db.imFriend.create({
           data: {
             userId: applyInfo.userId,
             friendId: applyInfo.friendId,
@@ -226,7 +225,7 @@ export class ImService {
         })
       }
       else if (status === 1) {
-        await this.mongoService.imFriendApply.update({
+        await this.db.imFriendApply.update({
           where: {
             id: admitInfo.id,
           },
@@ -245,10 +244,10 @@ export class ImService {
   async friendAdd(socket: Socket, friendInfo: AddFriendDto) {
     try {
       const userId = socket.handshake.auth.userId
-      const user = await this.mongoService.imUser.findUnique({ where: { userId } })
+      const user = await this.db.imUser.findUnique({ where: { userId } })
 
       const { friendId } = friendInfo
-      const friend = await this.mongoService.imFriend.findFirst({
+      const friend = await this.db.imFriend.findFirst({
         where: {
           userId,
           friendId,
@@ -259,7 +258,7 @@ export class ImService {
         return Result.fail(ImErrorMsg.ImFriendHasExist)
       }
 
-      const applyRecord = await this.mongoService.imFriendApply.findFirst({
+      const applyRecord = await this.db.imFriendApply.findFirst({
         where: {
           userId,
           friendId,
@@ -272,8 +271,8 @@ export class ImService {
 
       const socketId = await this.redis.get(`${RedisCacheKey.SocketId}${friendId}`)
 
-      const [notification] = await this.mysqlService.$transaction([
-        this.mysqlService.notification.create({
+      const [notification] = await this.db.$transaction([
+        this.db.notification.create({
           data: {
             notificationId: (new Snowflake(1, 1)).generateId(),
             title: `${user.userName}${NotificationTitle.FriendAdd}`,
@@ -282,7 +281,7 @@ export class ImService {
             from: userId,
           },
         }),
-        this.mongoService.imFriendApply.create({
+        this.db.imFriendApply.create({
           data: {
             userId,
             friendId,

@@ -1,6 +1,6 @@
 import { FactoryName } from '@libs/common/enums/factory'
 import { ImMessageStatusEnum, ImUserStatusEnum } from '@libs/common/enums/im'
-import { MongoService } from '@libs/common/services/prisma.service'
+import { PrismaService } from '@libs/common/services/prisma.service'
 import { transformPageToOrmQry } from '@libs/common/utils/page'
 import { Result } from '@libs/common/utils/result'
 import { Inject, Injectable } from '@nestjs/common'
@@ -12,22 +12,21 @@ import { GetImMessageListDto, ReadMessageDto } from './dto/im-message'
 @Injectable()
 export class ImMessageService {
   constructor(
-    private mongoService: MongoService,
-
+    private db: PrismaService,
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
   ) {}
 
   async create(createImUserDto: CreateImUserDto) {
-    const imUser = await this.mongoService.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName: '' } })
+    const imUser = await this.db.imUser.create({ data: { ...createImUserDto, status: ImUserStatusEnum.OFFLINE, userName: '' } })
     return Result.success(imUser)
   }
 
   async findMessageList(query: GetImMessageListDto) {
     try {
-      const list = await this.mongoService.imMessage.findMany({ ...transformPageToOrmQry({ ...omit(query, ['friendId']) }), where: { fromUserId: query.friendId } })
+      const list = await this.db.imMessage.findMany({ ...transformPageToOrmQry({ ...omit(query, ['friendId']) }), where: { fromUserId: query.friendId } })
 
-      const total = await this.mongoService.imMessage.count({ where: { fromUserId: query.friendId } })
+      const total = await this.db.imMessage.count({ where: { fromUserId: query.friendId } })
       return Result.list(list, total)
     }
     catch (error) {
@@ -36,7 +35,7 @@ export class ImMessageService {
   }
 
   async findOne(userId: string) {
-    const imUser = await this.mongoService.imUser.findUnique({ where: { userId } })
+    const imUser = await this.db.imUser.findUnique({ where: { userId } })
     return Result.success(imUser)
   }
 
@@ -45,7 +44,7 @@ export class ImMessageService {
   }
 
   async readMessage(body: ReadMessageDto) {
-    await this.mongoService.imMessage.updateMany({
+    await this.db.imMessage.updateMany({
       where: {
         ...body,
         status: ImMessageStatusEnum.UNREAD,

@@ -2,7 +2,7 @@ import { RedisCacheKey } from '@libs/common/enums/redis'
 import { testBootstrap } from '@libs/common/utils/bootstrap'
 import { JwtService } from '@nestjs/jwt'
 import { NestFastifyApplication } from '@nestjs/platform-fastify'
-import { PrismaClient } from '@zgyh/prisma-mysql'
+import { PrismaClient } from '@prisma/client'
 import Redis from 'ioredis'
 import { CoreModule } from '../src/core.module'
 

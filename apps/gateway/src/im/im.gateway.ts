@@ -1,7 +1,6 @@
 import { SOCKET_NAMESPACE_IM, SOCKET_ORIGIN_EXCLUDE, SOCKET_PING_INTERVAL, SOCKET_PING_TIMEOUT } from '@libs/common/constant'
 import { SOCKET_EVENT } from '@libs/common/constant/socket-event'
 import { FactoryName } from '@libs/common/enums/factory'
-import { Snowflake } from '@libs/common/utils/snow-flake'
 import { NestedValidationErrors, validateWsBody } from '@libs/common/utils/validate'
 import { Inject, Logger } from '@nestjs/common'
 import { MessagePattern, Payload } from '@nestjs/microservices'

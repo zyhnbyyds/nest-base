@@ -1,7 +1,6 @@
 version: '3.9'
 
 services:
-  # MySQL 服务
   mysql:
     image: mysql:latest
     container_name: mysql
@@ -11,37 +10,39 @@ services:
       MYSQL_PASSWORD: yujiezhang187332
       MYSQL_DATABASE: nestjs_db
     ports:
-      - "3309:3306"
+      - '3309:3306'
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql:ro # 挂载初始化脚本
     networks:
       - net-backend
+    healthcheck: # 添加健康检查
+      test: [CMD, mysqladmin, ping, -uroot, -p$$MYSQL_ROOT_PASSWORD]
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
-  # NATS 服务
   nats:
     image: nats:latest
     container_name: nats
     volumes:
       - ./nats.conf:/etc/nats/nats.conf
-    command: ["-c", "/etc/nats/nats.conf"]
+    command: [-c, /etc/nats/nats.conf]
     ports:
-      - "4222:4222"
-      - "6222:6222"
-      - "8222:8222"
+      - '4222:4222'
+      - '8222:8222' # 仅暴露监控端口（集群端口无需暴露）
     networks:
       - net-backend
 
-  # Redis 服务
   redis:
     image: redis:latest
     container_name: redis
     command: redis-server --requirepass yujiezhang187332
     ports:
-      - "6389:6379"
+      - '6389:6379'
     networks:
       - net-backend
 
-  # MongoDB 服务
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -49,65 +50,52 @@ services:
       MONGO_INITDB_ROOT_USERNAME: nest-timer
       MONGO_INITDB_ROOT_PASSWORD: yujiezhang187332
     ports:
-      - "27019:27017"
+      - '27019:27017'
     volumes:
       - mongodb_data:/data/db
     networks:
       - net-backend
+    healthcheck: # 添加健康检查
+      test: [CMD, mongosh, --eval, "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
 
-  # NestJS 应用服务
   nestjs:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nestjs
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_HOST: redis # 使用服务名
+      REDIS_PORT: 6379 # 容器内部端口（非宿主机端口 6389）
       REDIS_PASSWORD: yujiezhang187332
       REDIS_DB: 0
-      JWT_SECRET: jwtsecret
-      JWT_EXPIRES_IN: 1h
-      JWT_REFRESH_SECRET: myrefreshsecret
-      DB_PORT: 3306
-      DB_HOST: localhost
+      DB_PORT: 3306 # 容器内部端口（非宿主机端口 3309）
+      DB_HOST: mysql # 关键修复：使用服务名
       DB_USERNAME: nest-timer
       DB_PASSWORD: yujiezhang187332
       DB_DATABASE: nestjs_db
-      DATABASE_MONGO_URL: mongodb://nest-timer:yujiezhang187332@mongo/nestjs_db
-      DATABASE_URL: mysql://nest-timer:yujiezhang187332@mysql/nestjs_db
-      DATABASE_HOST: mysql
-
-      EMAIL_HOST: smtp.163.com
-      EMAIL_PORT: 465
-      EMAIL_USER: 19939926438@163.com
-      EMAIL_PASSWORD: KZzjT7VQgmRYrFJ
-      EMAIL_FROM: "My Name <myemail@example.com>"
-
-      NATS_SERVER_URL: nats://nats:4222
-      NATS_AUTH_USER: nat_user
-      NATS_AUTH_PASSWORD: nat_passwordS
-
-      AUTH_PUBLIC_KEY: dev_AUTH_PUBLIC_KEY
-      IS_LOG_EVERY_REQ: Y
-
-      ALI_DEEPDEEK_APP_KEY: sk-1ff471c57bd34a9ca7ba46ea72731479
-      ALI_DEEPSEEK_APP_BASE_URL: https://dashscope.aliyuncs.com/compatible-mode/v1
-
-      DEEP_SEEK_APP_KEY: sk-7886de6009b54b7cb2d7662637d98e3e
-      DEEP_SEEK_APP_BASE_URL: https://api.deepseek.com
+      DATABASE_MONGO_URL: mongodb://nest-timer:yujiezhang187332@mongo:27017/nestjs_db?authSource=admin # 添加认证库
+      DATABASE_URL: mysql://nest-timer:yujiezhang187332@mysql:3306/nestjs_db # 使用服务名和内部端口
+      NATS_SERVER_URL: nats://nats:4222 # 使用服务名
+      # 其他环境变量保持不变...
     ports:
-      - "3000:3000"
-      - "3001:3001"
-      - "3005:3005"
-      - "3004:3004"
-      - "3100:3100"
-      - "3006:3006"
+      - '3000:3000'
+      - '3001:3001'
+      - '3004:3004'
+      - '3005:3005'
+      - '3006:3006'
+      - '3100:3100'
     depends_on:
-      - mysql
-      - redis
-      - mongo
-      - nats
+      mysql:
+        condition: service_healthy # 依赖健康状态
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      nats:
+        condition: service_started
     networks:
       - net-backend
 

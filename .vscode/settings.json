@@ -2,9 +2,13 @@
   "typescript.tsdk": "node_modules\\typescript\\lib",
   "cSpell.words": [
     "anatine",
+    "healthcheck",
     "jwtsecret",
     "metatype",
-    "openapi"
+    "mongosh",
+    "mysqladmin",
+    "openapi",
+    "uroot"
   ],
   "cSpell.ignorePaths": [
     "package-lock.json",

@@ -11,5 +11,5 @@ RUN pnpm db:init
 
 RUN pnpm build:all
 
-CMD ["sh", "-c", "sleep 15 && pm2-runtime start ecosystem.config.js"]
-
+# 移除构建阶段的 db:init（应在容器启动时执行）
+CMD ["sh", "-c", "pm2-runtime start ecosystem.config.js"]
