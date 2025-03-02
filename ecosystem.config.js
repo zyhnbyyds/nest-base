@@ -15,6 +15,7 @@ module.exports = {
       out_file: './logs/auth-out.log',
       merge_logs: true,
       port: 3005,
+      restart_delay: 2000,
     },
     {
       name: 'Core',
@@ -31,6 +32,8 @@ module.exports = {
       out_file: './logs/core-out.log',
       merge_logs: true,
       port: 3001,
+      restart_delay: 5000,
+      restart_max_retries: 3,
     },
     {
       name: 'Email',
@@ -47,6 +50,8 @@ module.exports = {
       out_file: './logs/email-out.log',
       merge_logs: true,
       port: 3006,
+      restart_delay: 5000,
+      restart_max_retries: 3,
     },
     {
       name: 'Gateway',
@@ -63,6 +68,8 @@ module.exports = {
       out_file: './logs/gateway-out.log',
       merge_logs: true,
       port: 3000,
+      restart_delay: 5000,
+      restart_max_retries: 3,
     },
   ],
 }

@@ -80,6 +80,7 @@ export async function bootstrap(options: BootstrapOptions) {
 
   await app.listen({
     port: options.port,
+    host: '0.0.0.0',
   })
 
   Logger.log(`App${options.name} running on the ${options.port}`)

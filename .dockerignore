@@ -8,3 +8,11 @@ README.md
 npm-debug.log
 yarn-error.log
 .pnpm-debug.log
+.env
+.env.dev
+
+coverage
+apps-doc
+.vscode
+docker-compose.yaml
+
