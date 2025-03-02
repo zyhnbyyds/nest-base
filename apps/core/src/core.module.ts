@@ -8,11 +8,13 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { ImModule } from './modules/im/im.module'
 import { NotificationModule } from './modules/notification/notification.module'
 import { UserModule } from './modules/user/user.module'
+import { WeixinModule } from './modules/weixin/weixin.module'
 
 @Module({
   imports: [
     UserModule,
     ImModule,
+    WeixinModule,
     CommonModule,
     JwtModuleImport,
     ScheduleModule.forRoot(),

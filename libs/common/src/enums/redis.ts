@@ -7,4 +7,8 @@ export enum RedisCacheKey {
   UserEmailVerifyCode = 'user:email:verify:code:',
   UserEmailVerifyCodeExpire = 'user:email:verify:code:expire:',
   UserEmailVerifyCodeCount = 'user:email:verify:code:count:',
+
+  // WX
+  WxServerToken = 'wx:server:token',
+  WxServerTokenExpire = 'wx:server:expire',
 }

@@ -13,7 +13,7 @@ export class TasksService {
     private nats: NatsConnection,
   ) {}
 
-  @Cron('16 * * * *')
+  @Cron('54 * * * *')
   async handleCron() {
     const start = Date.now()
     try {

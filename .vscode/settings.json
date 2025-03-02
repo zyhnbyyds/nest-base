@@ -2,6 +2,8 @@
   "typescript.tsdk": "node_modules\\typescript\\lib",
   "cSpell.words": [
     "anatine",
+    "appsecret",
+    "echostr",
     "healthcheck",
     "jwtsecret",
     "metatype",
@@ -9,6 +11,8 @@
     "mysqladmin",
     "nestbasepass",
     "openapi",
+    "topcolor",
+    "touser",
     "uroot"
   ],
   "cSpell.ignorePaths": [
