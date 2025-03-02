@@ -1,5 +1,5 @@
 # ---------- 第一阶段：构建阶段 ----------
-FROM node:20.3.1 AS builder
+FROM node:20.18.3 AS builder
 
 WORKDIR /cache
 
