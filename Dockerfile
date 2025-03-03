@@ -1,5 +1,5 @@
 # ---------- 第一阶段：构建阶段 ----------
-FROM node:20.3.1 AS builder
+FROM ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/node:${NODE_VERSION} AS builder
 
 WORKDIR /cache
 

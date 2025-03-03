@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   mysql:
-    image: mysql:latest
+    image: ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/mysql:${MYSQL_IMAGE_TAG:-latest}
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: nestbasepass
@@ -23,7 +23,7 @@ services:
       retries: 10
 
   nats:
-    image: nats:latest
+    image: ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/nats:${NATS_IMAGE_TAG:-latest}
     container_name: nats
     volumes:
       - ./nats.conf:/etc/nats/nats.conf
@@ -35,7 +35,7 @@ services:
       - net-backend
 
   redis:
-    image: redis:latest
+    image: ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/redis:${REDIS_IMAGE_TAG:-latest}
     container_name: redis
     command: redis-server --requirepass nestbasepass
     ports:
