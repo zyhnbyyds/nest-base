@@ -1,5 +1,8 @@
 # ---------- 第一阶段：构建阶段 ----------
-FROM ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/node:${NODE_VERSION} AS builder
+ARG IMAGE_REGISTRY=docker.io
+ARG IMAGE_NAMESPACE=library/
+ARG NODE_VERSION=22.0.0
+FROM ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}node:${NODE_VERSION} AS builder
 
 WORKDIR /cache
 
