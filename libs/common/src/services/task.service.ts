@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule'
 import { NatsConnection } from 'nats'
 import OpenAI from 'openai'
 import { FactoryName } from '../enums/factory'
+import { PrismaService } from './prisma.service'
 
 @Injectable()
 export class TasksService {
@@ -11,6 +12,8 @@ export class TasksService {
     private deepSeek: OpenAI,
     @Inject(FactoryName.NatsFactory)
     private nats: NatsConnection,
+
+    private prisma: PrismaService,
   ) {}
 
   @Cron('54 * * * *')
@@ -30,6 +33,13 @@ export class TasksService {
         content: completion.choices[0].message.content,
         time: end - start,
       }))
+
+      this.prisma.deepseekEveryNews.create({
+        data: {
+          title: '总结今日的大事件',
+          content: completion.choices[0].message.content,
+        },
+      })
     }
     catch (error) {
       Logger.error(error)

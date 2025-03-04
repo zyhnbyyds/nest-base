@@ -1,11 +1,11 @@
+import { Public } from '@libs/common/guards/public.guard'
 import {
   Controller,
   Get,
+  Header,
+  HttpCode,
   HttpStatus,
-  Post,
   Query,
-  Req,
-  Res,
 } from '@nestjs/common'
 import { WeixinService } from './weixin.service'
 
@@ -13,7 +13,10 @@ import { WeixinService } from './weixin.service'
 export class WeixinController {
   constructor(private readonly weixinService: WeixinService) {}
 
+  @Public()
   @Get('/validateWxServer')
+  @Header('Content-Type', 'text/plain')
+  @HttpCode(HttpStatus.OK)
   async validateWxServer(
     @Query()
     query: {
@@ -22,17 +25,17 @@ export class WeixinController {
       nonce: string
       echostr: string
     },
-    @Res() res: any,
   ) {
     const echostr = await this.weixinService.validateWeiXin(query)
-    res
-      .status(HttpStatus.OK)
-      .setHeader('Content-Type', 'text/plain')
-      .send(echostr)
+
+    return echostr
   }
 
+  @Public()
   @Get('/test')
   async test() {
-    this.weixinService.sendMsgToWxUserFromTemplate('VDFZJoT91BiLok0AMERoyTOkAOJRKZ0XMhTj2jZH3kM')
+    const testTemplate = process.env.WX_TEST_TEMPLATE_ID
+    await this.weixinService.sendMsgToWxUserFromTemplate(testTemplate)
+    return 'ok'
   }
 }

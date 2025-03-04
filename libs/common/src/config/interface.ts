@@ -31,3 +31,10 @@ export interface NatsConfig {
   user: string
   pass: string
 }
+
+export interface WxConfig {
+  appid: string
+  secret: string
+  token: string
+  templateId: string
+}

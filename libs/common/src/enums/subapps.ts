@@ -13,11 +13,11 @@ export enum SubAppEnum {
  * 子应用路由前缀
  */
 export enum SubAppRoutePrefixEnum {
-  Auth = '/auth',
-  Core = '/core',
-  Logger = '/logger',
-  Email = '/email',
-  Gateway = '/gateway',
+  Auth = 'auth',
+  Core = 'core',
+  Logger = 'logger',
+  Email = 'email',
+  Gateway = 'gateway',
 }
 
 /**

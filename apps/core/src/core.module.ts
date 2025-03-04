@@ -25,6 +25,6 @@ import { WeixinModule } from './modules/weixin/weixin.module'
 })
 export class CoreModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TimeZoneMiddleware).forRoutes('*')
+    consumer.apply(TimeZoneMiddleware).forRoutes('*path')
   }
 }

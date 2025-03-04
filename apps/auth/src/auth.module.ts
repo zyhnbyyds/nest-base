@@ -20,6 +20,6 @@ import { AuthService } from './auth.service'
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TimeZoneMiddleware).forRoutes('*')
+    consumer.apply(TimeZoneMiddleware).forRoutes('*path')
   }
 }

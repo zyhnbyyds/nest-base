@@ -1,10 +1,12 @@
 import * as crypto from 'node:crypto'
+import { WxConfig } from '@libs/common/config/interface'
 import { wxReqBaseUrl } from '@libs/common/constant/wx'
 import { FactoryName } from '@libs/common/enums/factory'
 import { RedisCacheKey } from '@libs/common/enums/redis'
 import { WxTokenRes, WxUserListRes } from '@libs/common/types/weixin'
 import { HttpService } from '@nestjs/axios'
 import { Inject, Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Cron } from '@nestjs/schedule'
 import Redis from 'ioredis'
 import { NatsConnection } from 'nats'
@@ -18,6 +20,7 @@ export class WeixinService {
     private axios: HttpService,
     @Inject(FactoryName.RedisFactory)
     private redis: Redis,
+    private config: ConfigService,
   ) {
     this.nats.subscribe('deepseek.chat.completions', {
       callback: (err, msg) => {
@@ -25,12 +28,11 @@ export class WeixinService {
           Logger.error(err)
         }
         if (msg) {
-          this.sendMsgToWxUserFromTemplate('VDFZJoT91BiLok0AMERoyTOkAOJRKZ0XMhTj2jZH3kM')
+          const { templateId } = this.config.get<WxConfig>('wx')
+          this.sendMsgToWxUserFromTemplate(templateId, msg.data.toString())
         }
       },
     })
-
-    this.getAccessToken()
   }
 
   async validateWeiXin(query: {
@@ -40,8 +42,7 @@ export class WeixinService {
     echostr: string
   }) {
     const { signature, timestamp, nonce, echostr } = query
-
-    const token = process.env.WEIXIN_TOKEN
+    const { token } = this.config.get<WxConfig>('wx')
 
     const hash = crypto
       .createHash('sha1')
@@ -59,18 +60,18 @@ export class WeixinService {
   /**
    * 根据模板信息发送消息
    */
-  async sendMsgToWxUserFromTemplate(templateId: string) {
+  async sendMsgToWxUserFromTemplate(templateId: string, msg: string = '') {
     const data = await this.getWxUserList()
     if (data) {
       const { data: { openid } } = data
       for (const openId of openid) {
-        this.sendMsgToWxUser(openId, templateId)
+        this.sendMsgToWxUser(openId, templateId, msg)
         this.getWxUserInfo(openId)
       }
     }
   }
 
-  async sendMsgToWxUser(openId: string, templateId: string) {
+  async sendMsgToWxUser(openId: string, templateId: string, message: string) {
     const token = await this.redis.get(RedisCacheKey.WxServerToken)
     const msgInfo = {
       touser: openId,
@@ -78,7 +79,7 @@ export class WeixinService {
       topcolor: '#FF0000',
       data: {
         test: {
-          value: '您好，您有新的消息',
+          value: message,
           color: '#173177',
         },
       },
@@ -123,13 +124,14 @@ export class WeixinService {
     }
   }
 
-  @Cron('0 0 */1 * * *')
+  @Cron('0 0 8 * * *')
   async getAccessToken() {
     try {
-      // test-params
+      const { appid, secret } = this.config.get<WxConfig>('wx')
+
       const params = {
-        appid: 'wx9bb1020a9deb640a',
-        secret: 'e92615c5994626a21a084d2b198889d3',
+        appid,
+        secret,
         grant_type: 'client_credential',
       }
       const { data } = await lastValueFrom(this.axios.get<WxTokenRes>(`${wxReqBaseUrl}token`, { params, method: 'GET' }))

@@ -39,5 +39,11 @@ declare namespace Middle {
     // DeepSeek ai
     DEEP_SEEK_APP_KEY: string
     DEEP_SEEK_APP_BASE_URL: string
+
+    // Weixin
+    WX_APPID_GZ: string
+    WX_SECRET_GZ: string
+    WX_TOKEN: string
+    WX_TEST_TEMPLATE_ID: string
   }
 }

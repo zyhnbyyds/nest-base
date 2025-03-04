@@ -1,0 +1,10 @@
+model DeepseekEveryNews {
+  id         String   @id  @unique @default(uuid())
+  title      String   @map("title")
+  content    String   @map("content")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isDelete   Boolean? @default(false)
+
+  @@map("deepseek_every_news")
+}

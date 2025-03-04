@@ -37,7 +37,6 @@ export class ImGateway {
           Logger.error(err)
         }
         if (msg) {
-          Logger.log(msg.data.toString())
           this.server.send(msg.data.toString())
         }
       },

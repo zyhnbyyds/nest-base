@@ -85,6 +85,13 @@ class EnvironmentVariables {
 
   @IsString()
   NATS_AUTH_PASSWORD: string
+
+  // WX
+  @IsString()
+  WX_APPID_GZ: string
+
+  @IsString()
+  WX_SECRET_GZ: string
 }
 
 export function customValidateEnv(config: Record<string, unknown>) {
