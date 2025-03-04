@@ -44,7 +44,7 @@ services:
       - net-backend
 
   nestjs:
-    image: nestjs
+    image: nestjs:${NESTJS_VERSION-1.0.1}
     build:
       context: .
       dockerfile: Dockerfile

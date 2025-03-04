@@ -16,6 +16,7 @@ module.exports = {
       merge_logs: true,
       port: 3005,
       restart_delay: 2000,
+      restart_max_retries: 3,
     },
     {
       name: 'Core',
