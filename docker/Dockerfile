@@ -6,7 +6,7 @@ FROM ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/node:${NODE_VERSION}
 
 WORKDIR /app
 
-COPY . .
+COPY ../ .
 COPY /env/.env.prod .
 
 RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile
@@ -14,7 +14,7 @@ RUN npm install -g pnpm && pnpm install --prod --frozen-lockfile
 RUN pnpm dlx prisma generate && pnpm build:all
 
 RUN npm install -g pm2
-COPY ecosystem.config.js ./
+COPY ../ecosystem.config.js ./
 
 EXPOSE 3000
 EXPOSE 3001
