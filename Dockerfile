@@ -31,7 +31,7 @@ COPY --from=builder /app/ecosystem.config.js .
 COPY --from=builder /app/package.json .
 
 # 安装仅运行时依赖（生产环境）
-RUN npm install -g pm2 && npm i pnpm -g && pnpm dlx prisma migrate deploy
+RUN npm install -g pm2 && npm i pnpm -g
 
 
 # 合并 EXPOSE 指令
