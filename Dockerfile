@@ -29,6 +29,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/env/.env.prod .
 COPY --from=builder /app/ecosystem.config.js .
 COPY --from=builder /app/package.json .
+COPY --from=builder /app/.npmrc .
 
 # 安装仅运行时依赖（生产环境）
 RUN npm install -g pm2 && npm i pnpm -g
