@@ -18,7 +18,7 @@
     "dev:email": "cross-env NODE_ENV=dev nest start email -w",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "db:init": "prisma generate",
+    "db:gen": "prisma generate",
     "db:deploy": "pnpm prisma migrate deploy",
     "db:dev": "prisma migrate dev --schema ./prisma/mysql.prisma && prisma db push --schema ./prisma/mongo.prisma && ts-node prisma/change-package-name.mjs && pnpm changeset version",
     "compodoc": "compodoc -p tsconfig.doc.json -d apps-doc -r 3301 -s --language zh-CN",
