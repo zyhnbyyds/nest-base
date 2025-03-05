@@ -2,11 +2,13 @@
   "typescript.tsdk": "node_modules\\typescript\\lib",
   "cSpell.words": [
     "addgroup",
+    "aliyuncs",
     "anatine",
     "appsecret",
     "appuser",
     "echostr",
     "healthcheck",
+    "heyuan",
     "jwtsecret",
     "metatype",
     "mongosh",
