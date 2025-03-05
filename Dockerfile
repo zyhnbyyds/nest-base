@@ -38,4 +38,5 @@ RUN npm install -g pm2 && npm i pnpm -g
 # 合并 EXPOSE 指令
 EXPOSE 3000 3001 3004-3006 3100
 
-CMD ["pm2-runtime", "ecosystem.config.js"]
+# 启动应用
+CMD ["sh", "-c", "pnpm db:deploy && pm2-runtime ecosystem.config.js"]
