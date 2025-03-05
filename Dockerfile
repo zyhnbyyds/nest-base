@@ -12,12 +12,10 @@ WORKDIR /app
 COPY . .
 
 # 安装 pnpm 并构建依赖
-RUN npm install -g pnpm && \
-  pnpm install --frozen-lockfile
+RUN npm install -g pnpm && pnpm install --frozen-lockfile --prod
 
 # 生成 Prisma 客户端并构建项目
-RUN pnpm dlx prisma generate && \
-  pnpm build:all
+RUN pnpm prisma generate && pnpm build:all
 
 # ---------- 第二阶段：运行阶段 ----------
 FROM ${IMAGE_REGISTRY}/${IMAGE_NAMESPACE}/node:${NODE_VERSION}
