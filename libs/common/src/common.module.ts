@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { databaseConfig, emailConfig, jwtConfig, redisConfig } from './config'
+import { databaseConfig, emailConfig, jwtConfig, redisConfig, wxConfig } from './config'
 import NatsFactory from './factories/nats.factory'
 import RedisFactory from './factories/redis.factory'
 import { PrismaService } from './services/prisma.service'
@@ -15,13 +15,13 @@ import { customValidateEnv } from './utils/env'
     ConfigModule.forRoot({
       isGlobal: true,
       validate: customValidateEnv,
-      load: [redisConfig, emailConfig, databaseConfig, jwtConfig],
+      load: [redisConfig, emailConfig, databaseConfig, jwtConfig, wxConfig],
       envFilePath: ['.env', `.env.${process.env.NODE_ENV}`],
     }),
     // TODO: fix 修复在微服务调用情况下的rate limit报错
     // ThrottlerModule.forRootAsync({
     //   useFactory() {
-    //     const redis = RedisFactory.useFactory()
+    //     const redis = RedisFactory
     //     return {
     //       storage: new ThrottlerStorageRedisService(redis),
     //       throttlers: [
