@@ -9,6 +9,10 @@ module.exports = {
         NODE_ENV: 'prod',
         PORT: 3005,
       },
+      env_local: {
+        NODE_ENV: 'local',
+        PORT: 3005,
+      },
       watch: false,
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
       error_file: './logs/auth-error.log',
@@ -25,6 +29,10 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'prod',
+        PORT: 3001,
+      },
+      env_local: {
+        NODE_ENV: 'local',
         PORT: 3001,
       },
       watch: false,
@@ -45,6 +53,10 @@ module.exports = {
         NODE_ENV: 'prod',
         PORT: 3006,
       },
+      env_local: {
+        NODE_ENV: 'local',
+        PORT: 3006,
+      },
       watch: false,
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
       error_file: './logs/email-error.log',
@@ -61,6 +73,10 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'prod',
+        PORT: 3000,
+      },
+      env_local: {
+        NODE_ENV: 'local',
         PORT: 3000,
       },
       watch: false,

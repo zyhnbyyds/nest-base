@@ -1,6 +1,6 @@
 declare namespace Middle {
   interface ProcessEnvMid {
-    NODE_ENV?: 'dev' | 'prod'
+    NODE_ENV?: 'dev' | 'prod' | 'local'
 
     // Redis
     REDIS_HOST: string

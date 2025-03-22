@@ -8,6 +8,7 @@ export function isDevMode(): boolean {
 enum Environment {
   Development = 'dev',
   Production = 'prod',
+  Local = 'local',
 }
 
 class EnvironmentVariables {
